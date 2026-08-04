@@ -1,4 +1,10 @@
 .idea/
+.vscode/
 node_modules/
 
+# Generated build artifact (see scripts/build.mjs) — never committed.
 SpaceCompany.min.js
+
+# OS / editor local state
+.DS_Store
+*.swp
