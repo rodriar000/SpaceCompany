@@ -1,3 +1,98 @@
+# Space Company — Modernization Fork
+
+This is **Rodrigo's modernization fork** of *Space Company*, a science-fiction
+incremental browser game. The goal of the fork is to modernize the tooling,
+architecture and visual design **without changing gameplay, balance, or save
+compatibility**.
+
+> **Attribution.** The original game was created by **sparticle999**
+> (https://github.com/sparticle999/SpaceCompany) and is licensed under the MIT
+> licence (see [`LICENCE.txt`](LICENCE.txt)). This fork preserves that licence and
+> copyright notice. All original gameplay design credit belongs to sparticle999
+> and the Space Company community. The original project README (overview and full
+> changelog) is preserved below.
+
+- **Upstream:** https://github.com/sparticle999/SpaceCompany
+- **This fork:** https://github.com/rodriar000/SpaceCompany
+
+## Status: Milestone M0 — Legacy Baseline & Modernization Foundation
+
+M0 establishes a reproducible local development environment, characterization
+tests around the legacy behaviour, and documentation — **no gameplay, balance,
+progression or save-format changes**. See [`docs/`](docs/) for the full analysis:
+
+- [`docs/LEGACY_ARCHITECTURE.md`](docs/LEGACY_ARCHITECTURE.md) — how the legacy game is wired.
+- [`docs/SAVE_COMPATIBILITY.md`](docs/SAVE_COMPATIBILITY.md) — storage keys, save schema, invariants.
+- [`docs/MODERNIZATION_ROADMAP.md`](docs/MODERNIZATION_ROADMAP.md) — milestones M0–M8.
+- [`docs/VISUAL_DIRECTION.md`](docs/VISUAL_DIRECTION.md) — proposed premium sci-fi visual language.
+- [`docs/RISK_REGISTER.md`](docs/RISK_REGISTER.md) — risks identified during forensics.
+
+## Requirements
+
+- **Node.js ≥ 18** (developed and verified on Node 22). See [`.nvmrc`](.nvmrc).
+- No third-party runtime or build dependencies — the toolchain uses only the
+  Node standard library, so `npm install` installs nothing but a lockfile.
+
+## Install
+
+```bash
+npm install
+```
+
+## Run the game locally
+
+The game is a static site that must be served over HTTP (so relative asset
+paths and `localStorage` behave like production):
+
+```bash
+npm start            # serves http://localhost:8080/
+PORT=8123 npm start  # choose a different port
+```
+
+Then open the printed URL in a browser.
+
+## Build the bundle
+
+The legacy Grunt pipeline was broken and unused (see the roadmap/architecture
+docs). `npm run build` reproduces its *intent* deterministically — it derives
+the application-script order directly from `index.html` and concatenates the
+files into `SpaceCompany.min.js`:
+
+```bash
+npm run build
+```
+
+The output is byte-for-byte reproducible (the build prints a `sha256`). The
+bundle is a **generated artifact**: it is git-ignored and is intentionally
+**not** wired into `index.html` in M0 (the game still loads individual scripts).
+
+## Test & lint
+
+```bash
+npm test     # Node's built-in test runner: characterization + save-safety tests
+npm run lint # static syntax check (node --check) over every first-party script
+npm run verify   # lint + build + test in one go
+```
+
+The characterization tests (in [`test/`](test/)) lock down the observable legacy
+behaviour — number formatting, initial state, cost/affordability, the tick
+engine, offline-gain boundaries, reset guards, and the full save/serialize/load
+and import/export round-trip — so future refactors can't silently change them.
+
+## Branch strategy
+
+| Branch | Purpose |
+| --- | --- |
+| `gh-pages` | The currently **deployable legacy branch** (GitHub Pages). Left untouched. |
+| `dev` | Inherited integration branch. |
+| `feature/m0-modernization-foundation` | This milestone's work branch. |
+
+Modernization work happens on `feature/*` branches and is **not** merged into
+`dev` or `gh-pages` without review. `gh-pages` remains the source of truth for
+the live legacy game until a later milestone explicitly migrates deployment.
+
+---
+
 # Overview:
 Space Company is a science-fiction incremental game where you start from humble beginnings on Earth, working your way up to travelling between star systems and building Dyson Spheres and pretty much colonising the entire galaxy(ies?)
 
