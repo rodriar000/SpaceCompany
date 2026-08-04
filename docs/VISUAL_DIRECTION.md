@@ -134,3 +134,51 @@ for players with dozens of resources late game.
   flashed.
 - **Motion & audio:** respect reduced-motion; any audio is opt-in and muted by
   default with a persistent control.
+
+---
+
+# Implemented Tokens & Deviations (M1)
+
+M1 implemented this direction as a token system in `styles/modern/tokens.css`
+(consumed by `base.css`, `shell.css`, `components.css`, `responsive.css`). The
+canonical token names live in that file; this section records the concrete
+values chosen and where reality deviated from the direction above.
+
+## Implemented token families
+
+- **Surfaces:** `--sc-space-0..1` (void/canvas), `--sc-surface-1..3`,
+  `--sc-surface-glass` (blurred header/workspace).
+- **Borders:** `--sc-border`, `--sc-border-strong`, `--sc-divider`,
+  `--sc-inner-highlight` (top-edge sheen).
+- **Text:** `--sc-text`, `--sc-text-strong`, `--sc-text-secondary`,
+  `--sc-text-muted`.
+- **Accents:** `--sc-cyan{,-bright,-dim,-glow,-faint}` (reactor),
+  `--sc-amber{,-bright,-dim,-glow}` (prestige).
+- **States:** `--sc-positive|negative|warning|info` (+ `-bg` variants).
+- **Focus:** `--sc-focus`, `--sc-focus-ring`.
+- **Type:** `--sc-font-display` (Orbitron + system fallback), `--sc-font-ui`
+  (system sans), `--sc-font-mono` (tabular numerics); scale `--sc-fs-xs..display`.
+- **Spacing:** `--sc-sp-1..8` (4/8px grid). **Radius:** `--sc-r-1..3`, `-pill`.
+- **Elevation:** `--sc-elev-1..3`, `--sc-glow-cyan`.
+- **Motion:** `--sc-dur-1..3`, `--sc-ease`, `--sc-ease-out`.
+- **Layout:** `--sc-header-h`, `--sc-nav-h`, `--sc-content-max`, breakpoints.
+
+## Deviations / decisions
+
+- **Deep-space canvas is 100% CSS** (radial gradients + code-native star field +
+  faint grid), not an image or `<canvas>` — chosen to avoid downloads and any
+  animation loop competing with the 10 Hz game loop. A very slow (240s) drift is
+  disabled under `prefers-reduced-motion`.
+- **Red-cost convention preserved.** Legacy `.red` (unaffordable) is kept but
+  remapped to a dark-legible `--sc-negative` **plus** a weight/shadow cue so
+  affordability is not conveyed by hue alone; `.bold` underline remains.
+- **Resource rows are only lightly restyled** in M1 (surface + tabular numbers).
+  The full resource-card system in this direction is intentionally **M2**.
+- **Navigation is a horizontal command strip**, not a left rail — a left rail
+  would require moving `#tabList` and risk the legacy DOM contract. The strip
+  becomes horizontally scrollable on mobile (no hover-only menus).
+- **Orbitron retained via Google Fonts** with a system display fallback rather
+  than self-hosted (licence verification deferred; see PRIVACY.md).
+- **Light theme** is described in this direction but M1 ships **dark as the
+  canonical identity**; a first-class light theme is deferred to a later
+  milestone. Legacy Bootstrap themes remain available via `?ui=legacy`.

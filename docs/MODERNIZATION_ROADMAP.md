@@ -22,14 +22,22 @@ Guiding principles:
 - Documentation: architecture, save compatibility, roadmap, visual direction.
 - **No gameplay, balance, progression, or save-format changes.**
 
-## M1 — Visual design system & non-destructive shell
+## M1 — Visual design system & non-destructive shell 🚧 (implemented on `feature/m1-...`, pending review)
 
-- Introduce the design tokens from [VISUAL_DIRECTION.md](VISUAL_DIRECTION.md)
-  (CSS custom properties: colour, type, spacing, surfaces) **without** ripping
-  out Bootstrap — layer a new theme on top, behind a feature flag.
-- Build a modern app "shell" (header, navigation frame) that hosts the existing
-  legacy panels unchanged.
-- No changes to game logic or the DOM contract the legacy JS depends on.
+- ✅ Introduced the design tokens from [VISUAL_DIRECTION.md](VISUAL_DIRECTION.md)
+  (`styles/modern/tokens.css`) — layered over Bootstrap, scoped to
+  `html[data-ui="modern"]`, with a `?ui=legacy` fallback.
+- ✅ Built a command-center shell (instrumentation header, command-strip nav,
+  glass workspace, cinematic loader) hosting the existing legacy panels
+  unchanged; deep-space CSS canvas; legacy component compatibility layer.
+- ✅ Removed inherited Google Analytics + Kongregate script (see
+  [PRIVACY.md](PRIVACY.md)); documented the DOM contract
+  ([UI_DOM_CONTRACT.md](UI_DOM_CONTRACT.md)) and acceptance
+  ([M1_VISUAL_ACCEPTANCE.md](M1_VISUAL_ACCEPTANCE.md)).
+- ✅ No changes to game logic, balance, progression, or the save schema/DOM
+  contract the legacy JS depends on.
+- Deferred to M2: the true responsive resource dashboard (M1 only lightly
+  restyles the resource rows).
 
 ## M2 — Modern responsive resource dashboard
 
