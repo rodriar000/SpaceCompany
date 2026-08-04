@@ -1,0 +1,152 @@
+/* ============================================================================
+ * Space Company — Modern Design System : BASE + DEEP-SPACE CANVAS
+ *
+ * Everything is scoped under html[data-ui="modern"] so the legacy presentation
+ * (html[data-ui="legacy"]) is never touched. The canvas is built entirely from
+ * CSS gradients (no raster download, no <canvas> loop) so it cannot compete
+ * with the 10 Hz game loop and adds zero layout shift.
+ * ==========================================================================*/
+
+html[data-ui="modern"],
+html[data-ui="modern"] body {
+  background: var(--sc-space-1);
+  color: var(--sc-text);
+  font-family: var(--sc-font-ui);
+  font-size: var(--sc-fs-base);
+  line-height: var(--sc-lh-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Colour fields + vignette: fixed, non-interactive, static. */
+html[data-ui="modern"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 620px at 50% -8%, rgba(53, 224, 214, 0.10), transparent 60%),
+    radial-gradient(1400px 900px at 82% 8%, rgba(90, 120, 200, 0.10), transparent 62%),
+    radial-gradient(1200px 1000px at 8% 100%, rgba(20, 40, 80, 0.30), transparent 60%),
+    radial-gradient(160% 120% at 50% 0%, transparent 55%, rgba(0, 0, 0, 0.55) 100%),
+    linear-gradient(180deg, var(--sc-navy-1), var(--sc-space-1) 55%, var(--sc-space-0));
+}
+
+/* Star field + faint technical grid: fixed, non-interactive. Pure CSS stars. */
+html[data-ui="modern"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.9;
+  background-image:
+    /* faint engineered grid */
+    repeating-linear-gradient(0deg, rgba(126, 166, 214, 0.035) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(90deg, rgba(126, 166, 214, 0.035) 0 1px, transparent 1px 88px),
+    /* scattered stars (two parallax tiles) */
+    radial-gradient(1.4px 1.4px at 40px 60px, rgba(255,255,255,0.9), transparent 60%),
+    radial-gradient(1.1px 1.1px at 180px 120px, rgba(200,225,255,0.7), transparent 60%),
+    radial-gradient(1.6px 1.6px at 320px 40px, rgba(255,255,255,0.85), transparent 60%),
+    radial-gradient(1px 1px at 500px 200px, rgba(180,210,255,0.6), transparent 60%),
+    radial-gradient(1.3px 1.3px at 640px 90px, rgba(255,255,255,0.8), transparent 60%),
+    radial-gradient(1px 1px at 120px 320px, rgba(200,225,255,0.55), transparent 60%),
+    radial-gradient(1.5px 1.5px at 420px 380px, rgba(255,255,255,0.75), transparent 60%),
+    radial-gradient(1.1px 1.1px at 700px 300px, rgba(180,210,255,0.6), transparent 60%),
+    radial-gradient(1.2px 1.2px at 250px 520px, rgba(255,255,255,0.7), transparent 60%),
+    radial-gradient(1px 1px at 560px 560px, rgba(200,225,255,0.5), transparent 60%),
+    radial-gradient(1.4px 1.4px at 60px 640px, rgba(255,255,255,0.72), transparent 60%),
+    radial-gradient(1px 1px at 680px 680px, rgba(180,210,255,0.55), transparent 60%);
+  background-size:
+    88px 88px, 88px 88px,
+    760px 760px, 760px 760px, 760px 760px, 760px 760px, 760px 760px, 760px 760px,
+    760px 760px, 760px 760px, 760px 760px, 760px 760px, 760px 760px, 760px 760px;
+  /* Extremely slow, GPU-cheap drift — a hint of parallax, never distracting. */
+  animation: sc-starfield-drift 240s linear infinite;
+}
+
+@keyframes sc-starfield-drift {
+  from { background-position: 0 0, 0 0, 0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0; }
+  to   { background-position: 0 0, 0 0, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px; }
+}
+
+/* Keep all real content above the canvas layers. */
+html[data-ui="modern"] #game,
+html[data-ui="modern"] #loadScreen,
+html[data-ui="modern"] .ui-pnotify {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Base typography rhythm --- */
+html[data-ui="modern"] h1,
+html[data-ui="modern"] h2,
+html[data-ui="modern"] h3,
+html[data-ui="modern"] h4 {
+  color: var(--sc-text-strong);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Tabular numerics everywhere numbers matter — stops value jitter. */
+html[data-ui="modern"] [id$="ps"],
+html[data-ui="modern"] #resourceNavParent span,
+html[data-ui="modern"] .sc-num,
+html[data-ui="modern"] table.table td,
+html[data-ui="modern"] #autoSaveTimer,
+html[data-ui="modern"] #versionLabel {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* --- Selection & links --- */
+html[data-ui="modern"] ::selection {
+  background: var(--sc-cyan-glow);
+  color: var(--sc-text-strong);
+}
+html[data-ui="modern"] a {
+  color: var(--sc-cyan);
+  transition: color var(--sc-dur-1) var(--sc-ease);
+}
+html[data-ui="modern"] a:hover,
+html[data-ui="modern"] a:focus {
+  color: var(--sc-cyan-bright);
+  text-decoration: none;
+}
+
+/* --- Visible keyboard focus everywhere --- */
+html[data-ui="modern"] a:focus-visible,
+html[data-ui="modern"] button:focus-visible,
+html[data-ui="modern"] [role="tab"]:focus-visible,
+html[data-ui="modern"] input:focus-visible,
+html[data-ui="modern"] select:focus-visible,
+html[data-ui="modern"] .btn:focus-visible {
+  outline: none;
+  box-shadow: var(--sc-focus-ring);
+  border-radius: var(--sc-r-1);
+}
+
+/* --- Custom scrollbars (WebKit/Blink) --- */
+html[data-ui="modern"] ::-webkit-scrollbar { width: 10px; height: 10px; }
+html[data-ui="modern"] ::-webkit-scrollbar-track { background: var(--sc-space-1); }
+html[data-ui="modern"] ::-webkit-scrollbar-thumb {
+  background: var(--sc-surface-3);
+  border: 2px solid var(--sc-space-1);
+  border-radius: var(--sc-r-pill);
+}
+html[data-ui="modern"] ::-webkit-scrollbar-thumb:hover { background: var(--sc-cyan-dim); }
+html[data-ui="modern"] * { scrollbar-color: var(--sc-surface-3) var(--sc-space-1); }
+
+/* --- Reduced motion: silence the canvas drift and long transitions --- */
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui="modern"] body::after { animation: none; }
+  html[data-ui="modern"] * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Never allow the page body to scroll horizontally. */
+html[data-ui="modern"] body { overflow-x: hidden; }
