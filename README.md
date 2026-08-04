@@ -5,12 +5,18 @@ incremental browser game. The goal of the fork is to modernize the tooling,
 architecture and visual design **without changing gameplay, balance, or save
 compatibility**.
 
-> **Attribution.** The original game was created by **sparticle999**
-> (https://github.com/sparticle999/SpaceCompany) and is licensed under the MIT
-> licence (see [`LICENCE.txt`](LICENCE.txt)). This fork preserves that licence and
-> copyright notice. All original gameplay design credit belongs to sparticle999
-> and the Space Company community. The original project README (overview and full
-> changelog) is preserved below.
+> **Attribution & licence.** The original game was created by **sparticle999**
+> (https://github.com/sparticle999/SpaceCompany). It is distributed under the
+> licence in [`LICENCE.txt`](LICENCE.txt): the MIT licence text **plus an
+> additional condition** — "Sparticle999 is made aware that the Software has been
+> used somewhere else." Because of that extra clause it is **not** unmodified,
+> standard MIT, so `package.json` declares `"SEE LICENSE IN LICENCE.txt"` rather
+> than `"MIT"`. This fork **preserves `LICENCE.txt` and the original copyright
+> notice byte-for-byte**, including the notification condition — meaning
+> **sparticle999 should be made aware that this fork reuses the Software.** All
+> original gameplay design credit belongs to sparticle999 and the Space Company
+> community. The original project README (overview and full changelog) is
+> preserved below.
 
 - **Upstream:** https://github.com/sparticle999/SpaceCompany
 - **This fork:** https://github.com/rodriar000/SpaceCompany
