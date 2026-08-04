@@ -1,17 +1,31 @@
 {
-  "name": "SpaceCompany",
+  "name": "spacecompany",
   "version": "0.4.3",
-  "homepage": "https://github.com/sparticle999/SpaceCompany",
-  "licenses": "",
+  "description": "Rodrigo's modernization fork of Space Company, an incremental science-fiction browser game originally by sparticle999.",
+  "homepage": "https://github.com/rodriar000/SpaceCompany",
   "author": {
-	  "name": "sparticle999"
+    "name": "sparticle999"
+  },
+  "contributors": [
+    {
+      "name": "Rodrigo (modernization fork)"
+    }
+  ],
+  "license": "SEE LICENSE IN LICENCE.txt",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rodriar000/SpaceCompany.git"
   },
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">=18"
   },
-  "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-contrib-concat": "~0.4.0",
-    "grunt-contrib-uglify": "~0.5.0"
-  }
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "serve": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "lint": "node scripts/lint.mjs",
+    "test": "node --test",
+    "verify": "npm run lint && npm run build && npm test"
+  },
+  "devDependencies": {}
 }
