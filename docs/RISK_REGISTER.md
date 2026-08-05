@@ -20,6 +20,16 @@ Baseline: `da4881e465a3a713ff0ccf26efc7c30aad905a87`.
 | R10 | **Accidental deploy/branch damage.** Work could land on `dev`/`gh-pages` and break the live legacy game. | Low | High | All work isolated on `feature/m0-modernization-foundation`; `gh-pages` left untouched and remains the deployable branch; nothing merged or pushed. |
 | R11 | **Generated artifact committed.** Committing `SpaceCompany.min.js` or `node_modules` would pollute history. | Low | Low | `.gitignore` covers `SpaceCompany.min.js`, `node_modules/`, editor/OS state; build writes only the ignored artifact. |
 
+## Risks added by later milestones
+
+| # | Risk | Likelihood | Impact | Mitigation |
+| - | ---- | ---------- | ------ | ---------- |
+| R12 | **A modern view becomes a second progression engine.** A research UI that computes its own affordability, deducts its own science or maintains its own unlock list would silently fork the game's rules. | Med | **Critical** | M3's map is a read-only projection: source-level tests forbid `buyTech`/`gainTech`/`unlockTech`/`apply`/`science -=`/`localStorage` in both M3 files, a state snapshot proves presentation actions change nothing, and a real purchase in real Chrome is asserted to deduct the canonical cost exactly once. |
+| R13 | **Spoiler leakage through a graph view.** Rendering the whole tech tree can expose names, costs and effects the legacy table deliberately hides. | High (without care) | Med | Concealment is enforced in the *model*: an undiscovered node's `publicName` is the literal `"Undiscovered"`, `publicCost` is `null` and `publicEffects` is empty, so the view cannot leak by accident. Concealed nodes are also removed from the tab order and the accessibility tree. Asserted in unit tests and re-checked against rendered DOM text at every browser viewport. |
+| R14 | **Removing a legacy row breaks unguarded legacy writes.** `solCenter.js` and `core.js` set `.className` on research rows via `getElementById(...)` with no null check. | Med | High | The legacy `#techTable` and its buttons stay in the DOM in every mode; only CSS hides them, behind a sibling combinator so a failed build degrades to the legacy interface. Tests assert the 33 legacy buttons still exist in map mode. |
+| R15 | **Presentation taxonomy leaking into gameplay.** Visual lanes could drift into being treated as game categories. | Low | Med | Lanes are declared presentation-only, are never read by game code, are total (an unmapped technology falls back rather than disappearing), and are asserted never to be written at runtime. Documented in M3_TECHNOLOGY_GRAPH.md. |
+| R16 | **Per-tick cost of a complex view.** A graph rebuilt on the 100 ms UI tick would degrade the whole game. | Med | Med | The DOM is built exactly once and node geometry is state-independent, so updates are diffed text/class writes. A structure signature gates re-projection; the steady per-tick cost measures 0.0055 ms and element counts are unchanged after 20 tab round-trips. |
+
 ## Standing rules carried forward
 
 - Saves are sacred: no key/serialization/economy change without a tested forward migration (SAVE_COMPATIBILITY.md).

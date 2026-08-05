@@ -21,47 +21,58 @@ compatibility**.
 - **Upstream:** https://github.com/sparticle999/SpaceCompany
 - **This fork:** https://github.com/rodriar000/SpaceCompany
 
-## Status: Milestone M2 — Responsive Resource Operations Dashboard
+## Status: Milestone M3 — Technology Graph & Progression Command Center
 
 **M0** established a reproducible dev environment, characterization tests and
 documentation. **M1** layered a premium, dark, cinematic command-center
 interface over the legacy game and removed inherited Google Analytics and the
-Kongregate script. **M2 (this branch)** replaces the fixed-width, four-column
-resource table with a responsive **resource-card dashboard**: icon, state badge,
-current/capacity with a storage meter, signed per-second rate and
-time-to-full/empty, grouped by category, with a comfortable/compact density
-control and a dense row form on phones.
+Kongregate script. **M2** replaced the fixed-width, four-column resource table
+with a responsive **resource-card dashboard**. **M3 (this branch)** replaces the
+flat research table with a **technology map**: stage columns flowing left to
+right, themed lane bands, SVG connectors with direction arrows, seven clearly
+distinguished states, a progression header, a frontier focus control and a
+selected-technology inspector — plus a distinct vertical progression pathway on
+phones.
 
 Every milestone so far is **non-destructive**: no gameplay, balance, progression
-or save-format change. The dashboard is a read-only *projection* of the legacy
-resource rows — it reads their lock and selection state, uses the game's own
-accessors and number formatters, and activates a resource by dispatching a real
-click on the legacy row — so a card can never disagree with the game.
+or save-format change. Both new views are read-only *projections* of the legacy
+DOM and data. The resource dashboard reads the legacy rows' lock and selection
+state and activates a resource by dispatching a real click on the row. The
+technology map derives its edges only from canonical `newTechs`, reads
+`unlocked` / `current` from `Game.tech`, and researches by dispatching a real
+click on the legacy `purchaseTech` button — so neither view can disagree with
+the game, and neither can spend a resource itself.
 
 See [`docs/`](docs/) for the full analysis:
 
 - [`docs/LEGACY_ARCHITECTURE.md`](docs/LEGACY_ARCHITECTURE.md) — how the legacy game is wired.
 - [`docs/SAVE_COMPATIBILITY.md`](docs/SAVE_COMPATIBILITY.md) — storage keys, save schema, invariants.
-- [`docs/UI_DOM_CONTRACT.md`](docs/UI_DOM_CONTRACT.md) — DOM IDs/classes the legacy code depends on (M1/M2 preserve these).
+- [`docs/UI_DOM_CONTRACT.md`](docs/UI_DOM_CONTRACT.md) — DOM IDs/classes the legacy code depends on (M1–M3 preserve these).
 - [`docs/MODERNIZATION_ROADMAP.md`](docs/MODERNIZATION_ROADMAP.md) — milestones M0–M8.
 - [`docs/VISUAL_DIRECTION.md`](docs/VISUAL_DIRECTION.md) — the premium sci-fi visual language + implemented tokens and cards.
 - [`docs/M1_VISUAL_ACCEPTANCE.md`](docs/M1_VISUAL_ACCEPTANCE.md) — M1 verification, screenshots, deferrals.
 - [`docs/M2_RESOURCE_DASHBOARD.md`](docs/M2_RESOURCE_DASHBOARD.md) — M2 verification, parity evidence, screenshots.
+- [`docs/M3_TECHNOLOGY_CONTRACT.md`](docs/M3_TECHNOLOGY_CONTRACT.md) — the canonical research boundary, the purchase path, legacy inconsistencies found.
+- [`docs/M3_TECHNOLOGY_GRAPH.md`](docs/M3_TECHNOLOGY_GRAPH.md) — graph derivation, visibility policy, layout algorithm, performance, accessibility.
+- [`docs/M3_VISUAL_ACCEPTANCE.md`](docs/M3_VISUAL_ACCEPTANCE.md) — M3 verification, purchase parity, screenshots, critical assessment.
 - [`docs/PRIVACY.md`](docs/PRIVACY.md) — tracking removed and remaining network calls.
 - [`docs/RISK_REGISTER.md`](docs/RISK_REGISTER.md) — risks identified during forensics.
 
 ### UI modes
 
-- **Default (modern):** the command-center shell with the resource dashboard —
-  open the game normally.
+- **Default (modern):** the command-center shell with the resource dashboard and
+  the technology map — open the game normally.
 - **Legacy resource list:** append `?resources=legacy` to keep the modern shell
   but restore the original resource table.
+- **Legacy research table:** append `?research=legacy` to keep the modern shell
+  but restore the original `#techTable` research interface.
 - **Legacy fallback:** append `?ui=legacy` to render the original Bootstrap
-  presentation wholesale (this also restores the legacy resource table).
+  presentation wholesale (this also restores both legacy tables).
 
-Both switches are diagnostic escape hatches: they are read from the URL each
-load and are **never** written to your save. The only preference the modern UI
-stores is resource-card density, under its own `sc.ui.resourceDensity` key.
+All three switches are diagnostic escape hatches: they are read from the URL
+each load and are **never** written to your save. The only preference the modern
+UI stores is resource-card density, under its own `sc.ui.resourceDensity` key;
+the technology map stores nothing at all.
 
 ## Requirements
 

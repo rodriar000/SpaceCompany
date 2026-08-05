@@ -22,9 +22,17 @@ object, and their loss only resets a display choice:
 | --- | --- | --- |
 | `sc.ui.resourceDensity` | `ui/modern/resourceDashboard.js` (M2) | `comfortable` \| `compact` — resource-card density. |
 
+M3 adds **no key at all**: `ui/modern/techGraph.js` and
+`ui/modern/techCommandCenter.js` never touch `localStorage` or `sessionStorage`,
+and the selected technology is module state that dies with the page. The
+research view mode is resolved from the URL on every load
+(`?research=legacy`, `?ui=legacy`) and is never persisted. Enforced by
+`test/researchCommandCenter.test.mjs`.
+
 Rules: modern UI modules must **never** read or write `localStorage["save"]`,
 and must tolerate storage being unavailable (private mode) without breaking.
-Enforced by `test/resourceDashboard.test.mjs` and `test/uiModeSwitch.test.mjs`.
+Enforced by `test/resourceDashboard.test.mjs`, `test/uiModeSwitch.test.mjs` and
+`test/researchCommandCenter.test.mjs`.
 
 ## Save object structure
 
@@ -55,6 +63,14 @@ researchUnlocked techUnlocked meteoriteUnlocked rocketLaunched (flags)
 ```
 
 `lastFixedUpdate` (epoch ms) anchors **offline-progress** calculations on load.
+
+### Technology state
+
+`Game.tech.save` writes `data.tech = { v: 2, i: { <techId>: { current, unlocked } } }`
+and `Game.tech.load` branches on `v` (`loadV1` migrates pre-v2 saves by reading
+the vestigial `researched` / `available` arrays). M3 changes none of this: the
+technology map reads `Game.tech.entries` and writes nothing, so a save produced
+before M3 and a save produced after it are identical for the same progress.
 
 ## Import / export pipeline
 
