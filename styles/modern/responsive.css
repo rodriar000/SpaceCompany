@@ -29,8 +29,16 @@
 @media (max-width: 480px) {
   html[data-ui="modern"] #game.container { width: 100% !important; padding: var(--sc-sp-2) var(--sc-sp-2) var(--sc-sp-6); }
   html[data-ui="modern"] .navbar.navbar-default { border-radius: var(--sc-r-2); margin-bottom: var(--sc-sp-3); }
-  html[data-ui="modern"] .navbar-default .navbar-header { gap: var(--sc-sp-1); }
+  /* Reclaim vertical space: tighter header, smaller brand + favicon. */
+  html[data-ui="modern"] .navbar-default .navbar-header {
+    min-height: 0;
+    padding: var(--sc-sp-1) 0;
+    gap: var(--sc-sp-1) var(--sc-sp-2);
+  }
+  html[data-ui="modern"] .navbar-default .navbar-brand { padding: 2px var(--sc-sp-1); }
+  html[data-ui="modern"] .navbar-brand img[src*="Favicon"] { width: 26px !important; height: 26px !important; }
   html[data-ui="modern"] .navbar-brand.page-title { font-size: var(--sc-fs-base); letter-spacing: 0.04em; }
+  html[data-ui="modern"] #versionLabel { font-size: 10px !important; padding: 1px var(--sc-sp-1); }
 
   /* Discord promo is non-essential on tiny screens — hide it, keep everything
      gameplay-relevant (identity, version, energy deficit, autosave). */

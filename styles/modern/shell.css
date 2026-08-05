@@ -191,7 +191,13 @@ html[data-ui="modern"] #tabContent {
   border-radius: var(--sc-r-3);
   box-shadow: var(--sc-elev-2);
   padding: var(--sc-sp-5);
-  min-height: 60vh;
+  /* Hug the content: a modest floor keeps the workspace substantial without
+     forcing a large empty glass box early-game — the deep-space canvas fills
+     the area below the panel intentionally. flow-root contains the legacy
+     float-based resource column so the panel expands to hold it (no clipping,
+     unlike overflow:hidden). */
+  min-height: 220px;
+  display: flow-root;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
