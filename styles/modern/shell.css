@@ -71,7 +71,10 @@ html[data-ui="modern"] .navbar-brand img[src*="Favicon"] {
   width: 34px !important;
   height: 34px !important;
   margin: 0 !important;
-  filter: drop-shadow(0 0 6px var(--sc-cyan-glow));
+  /* The inherited favicon is a dark planet mark — invisible on the dark header.
+     brightness(0) invert(1) renders it as a clean white mark (matching the
+     wordmark), then a cyan glow ties it to the reactor identity. */
+  filter: brightness(0) invert(1) drop-shadow(0 0 6px var(--sc-cyan-glow));
 }
 /* Version chip. */
 html[data-ui="modern"] #versionLabel {
