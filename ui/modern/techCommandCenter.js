@@ -838,37 +838,34 @@
     }
     if (!actionable.length) return;
 
+    /*
+     * Target the cheapest AFFORDABLE technology — the same one the "Ready to
+     * research" readout already lists first — so the control always lands on
+     * something the player can act on right now.
+     *
+     * This replaces an earlier pass that framed the bounding box of everything
+     * actionable. Once the player has opened several branches that box spans
+     * most of the canvas, so its top-left corner is empty gutter: at 1024x768
+     * mid-game the map viewport is only 587x597 against a 1920x2576 canvas and
+     * the framing landed with ZERO actionable nodes on screen, including after
+     * pressing the control whose whole purpose is to fix that.
+     */
+    actionable.sort(function (a, b) {
+      return (b.affordable - a.affordable) || (a.cost - b.cost) || (a.index - b.index);
+    });
+    var target = actionable[0];
+
     if (pathMode) {
-      var box = document.getElementById('scTech-' + actionable[0].id);
+      var box = document.getElementById('scTech-' + target.id);
       if (box && typeof box.scrollIntoView === 'function') {
         box.scrollIntoView({ block: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
       }
       return;
     }
 
-    var minX = Infinity;
-    var minY = Infinity;
-    var maxX = -Infinity;
-    var maxY = -Infinity;
-    for (i = 0; i < actionable.length; i++) {
-      var node = actionable[i];
-      if (node.x < minX) minX = node.x;
-      if (node.y < minY) minY = node.y;
-      if (node.x + node.w > maxX) maxX = node.x + node.w;
-      if (node.y + node.h > maxY) maxY = node.y + node.h;
-    }
-
-    /* If everything actionable fits, centre it. If it does not, anchor near the
-       first actionable node but keep a slice of already-researched history in
-       view above/behind it, so the map never opens on a wall of unknowns with
-       no sense of where the player came from. */
     var canvas = graph.layout.canvas;
-    var left = (maxX - minX) <= viewport.clientWidth
-      ? (minX + maxX) / 2 - viewport.clientWidth / 2
-      : minX - viewport.clientWidth * 0.18;
-    var top = (maxY - minY) <= viewport.clientHeight
-      ? (minY + maxY) / 2 - viewport.clientHeight / 2
-      : minY - viewport.clientHeight * 0.3;
+    var left = target.x + target.w / 2 - viewport.clientWidth / 2;
+    var top = target.y + target.h / 2 - viewport.clientHeight / 2;
 
     left = clamp(left, 0, Math.max(0, canvas.width - viewport.clientWidth));
     top = clamp(top, 0, Math.max(0, canvas.height - viewport.clientHeight));

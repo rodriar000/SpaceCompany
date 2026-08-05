@@ -118,7 +118,30 @@ rendered, mode `cards`, navigation still isolates a single pane, no console
 errors. `test/m2ResourceView.test.mjs` and `test/resourceDashboard.test.mjs`
 remain green.
 
-## 8. Critical assessment
+## 8. Frontier focus (integration-time finding)
+
+Pre-integration QA measured, per viewport and game state, how many actionable
+technologies were actually on screen when the research tab is opened and after
+pressing `Focus frontier`. The original bounding-box framing failed:
+
+| Viewport | State | Actionable | On open (before → after) | After `Focus frontier` (before → after) |
+| --- | --- | --- | --- | --- |
+| 1440×900 | fresh | 10 | 2 → 2 | 2 → 2 |
+| 1440×900 | mid | 11 | 2 → 2 | 2 → 2 |
+| 1440×900 | late | 4 | 4 → 4 | 4 → 4 |
+| 1024×768 | fresh | 10 | 2 → 2 | 2 → 2 |
+| **1024×768** | **mid** | **11** | **0 → 2** | **0 → 2** |
+| 1024×768 | late | 4 | 3 → 3 | 3 → 3 |
+
+At 1024×768 the map viewport is only 587×597 against a 1920×2576 canvas, so the
+actionable bounding box exceeded it in both axes and the framing anchored on an
+empty corner — with the remedy control equally ineffective. `focusFrontier()`
+now centres the cheapest affordable technology instead. Verified at both
+viewports that the centred node is exactly the readout's first entry
+("Tier 3 Science — 3000 science"). No other behaviour changed; the full 15-row
+Phase D matrix and all 177 tests stayed green.
+
+## 9. Critical assessment
 
 **What works.** The map reads as an engineered progression rather than a card
 grid: stage columns run left to right, themed lane bands run across, chains such
@@ -143,6 +166,11 @@ the map read as mostly emptiness; and a literal NUL byte had crept into an edge
 key, silently making the source file unreadable to `grep` and every other text
 tool. A sixth change — narrowing cards to 196 px to fit more stages — was
 implemented, caught clipping in the audit, and reverted.
+
+**Found at integration.** The frontier-focus framing described in §9 — the one
+material defect the milestone's own acceptance pass missed, because it measured
+framing at 1440 only and with a harness that opened the research tab before
+progressing the game. Both blind spots are now covered.
 
 **What is genuinely imperfect.** Seven stages of 216 px cards do not fit 1290 px
 of workspace, so the map pans horizontally at 1440 px and the opening view shows
