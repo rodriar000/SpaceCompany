@@ -33,6 +33,20 @@ added by this fork.**
   (an ordinary link that generates no on-load network call) is left intact — the
   privacy cleanup did not touch attribution/credits.
 
+### Inherited "Join our Discord!" header promo — REMOVED (M1 visual review)
+- **What:** the header anchor `<a href="http://discord.gg/hgRUjVp">Join our
+  Discord!</a>` — a promotion for the *original* project's community, not
+  Rodrigo's.
+- **Action:** removed from `index.html` (so it is absent from both the modern and
+  legacy runtimes). No replacement link was added. The header rebalances cleanly
+  (it is a flex row with gap spacing — no dead gap).
+- **Preserved:** the Help/FAQ "report a bug / support" links (which reference
+  sparticle999's reddit/discord/github) and all credit/attribution content are
+  **untouched** — those are original support/credits material, distinct from the
+  header promo.
+- Enforced by `test/m1VisualFixes.test.mjs` (asserts "Join our Discord!" and the
+  `discord.gg/hgRUjVp` header link are absent while attribution is preserved).
+
 ## Retained external call (audited)
 
 ### Google Fonts — Orbitron (RETAINED with graceful fallback)

@@ -151,6 +151,53 @@ contract, `.hidden`, or `?ui=legacy` behaviour changed):
 
 Affected viewports were re-rendered and re-verified after the fixes.
 
+## External visual review — defect corrections
+
+Four presentation defects were identified from the committed screenshots by an
+external review and corrected (CSS + markup + tests only — no gameplay, balance,
+progression, save, DOM-contract, `.hidden`, or `?ui=legacy` change; the
+deterministic JS bundle hash is unchanged):
+
+1. **Notifications clipped off-screen (BLOCKER).** Root cause: `base.css` had
+   lumped `.ui-pnotify` into a `position:relative` rule (to lift it above the
+   canvas), which broke PNotify's absolute-stacking and dropped toasts into
+   document flow at negative left offsets. Fix: removed `.ui-pnotify` from that
+   rule (PNotify's own z-index already sits above the canvas) and added
+   viewport-fixed containment in `components.css` — `position:fixed`, right
+   margin, `width: min(340px, calc(100vw - 32px))`, safe text wrapping, and
+   compact toast sizing so a burst stays short. Verified: with 8 simultaneous
+   toasts (and a 17 stress burst) at 1440/768/390/360, **no toast has a negative
+   left edge or exceeds the right edge**, and titles are never clipped.
+2. **Progressed mobile nav clipped "MORE…" (BLOCKER).** Root cause: once Research
+   unlocked, the scroll strip pushed "MORE…" past the right edge (`right 413 >
+   390`). Fix: mobile (`≤480px`) navigation now **wraps** into rows
+   (`flex-wrap:wrap`, pull-right auto-margin neutralised), so every unlocked item
+   is fully visible and tappable — no scroll-discovery, no hover menus. Verified:
+   `navItemsClipped: none` and all unlocked items present at 390/360.
+3. **Header logo invisible (BLOCKER).** The inherited favicon is a dark planet
+   mark, invisible on the dark header. Fix: `filter: brightness(0) invert(1)`
+   renders it as a clean white mark (matching the wordmark) with a cyan glow.
+4. **Inherited Discord promo (BLOCKER).** Removed the "Join our Discord!" header
+   anchor from `index.html` (see [PRIVACY.md](PRIVACY.md)); header rebalances via
+   flex gap. Help/FAQ support links and attribution preserved.
+
+### Final review screenshots (exact viewports, system Chrome, retina @2×)
+
+| File | Viewport | State | Notes |
+| --- | --- | --- | --- |
+| `final-modern-1440x900.jpg` | 1440×900 | fresh | white logo, no Discord |
+| `final-modern-progressed-1440x900.jpg` | 1440×900 | progressed + 8 achievements | toasts in a tidy right column, clear of nav |
+| `final-modern-390x844.jpg` | 390×844 | fresh | wrapped nav, compact header |
+| `final-modern-progressed-390x844.jpg` | 390×844 | progressed + 8 achievements | nav wraps (MORE visible), toasts contained |
+| `final-modern-360x800.jpg` | 360×800 | fresh | narrowest mobile |
+| `final-modern-progressed-360x800.jpg` | 360×800 | progressed + 8 achievements | contained + reachable |
+
+Bounding-box matrix (final): every viewport reported `hOverflow=false`,
+`noteAnyOffscreen=false`, `noteTitleClipped=false`, `navItemsClipped=none`,
+`discordInDom=false`, logo filter inverted (white), 0 console errors, 0 tracker
+requests. Save/reload persists a sentinel company name; the `?ui=legacy` switch
+leaves `localStorage["save"]` byte-identical.
+
 ## Known limitations (intentionally deferred)
 
 - **M2:** the resource list is only lightly restyled; the true responsive
