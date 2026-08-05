@@ -21,33 +21,47 @@ compatibility**.
 - **Upstream:** https://github.com/sparticle999/SpaceCompany
 - **This fork:** https://github.com/rodriar000/SpaceCompany
 
-## Status: Milestone M1 — Premium Sci-Fi Design System & Command-Center Shell
+## Status: Milestone M2 — Responsive Resource Operations Dashboard
 
 **M0** established a reproducible dev environment, characterization tests and
-documentation. **M1 (this branch)** layers a premium, dark, cinematic
-command-center interface over the legacy game **without changing gameplay,
-balance, progression or the save format** — the modern shell is a CSS layer plus
-a tiny presentation-only script, scoped to `html[data-ui="modern"]`. M1 also
-removes inherited Google Analytics and the Kongregate script. A diagnostic
-`?ui=legacy` fallback renders the original Bootstrap presentation.
+documentation. **M1** layered a premium, dark, cinematic command-center
+interface over the legacy game and removed inherited Google Analytics and the
+Kongregate script. **M2 (this branch)** replaces the fixed-width, four-column
+resource table with a responsive **resource-card dashboard**: icon, state badge,
+current/capacity with a storage meter, signed per-second rate and
+time-to-full/empty, grouped by category, with a comfortable/compact density
+control and a dense row form on phones.
+
+Every milestone so far is **non-destructive**: no gameplay, balance, progression
+or save-format change. The dashboard is a read-only *projection* of the legacy
+resource rows — it reads their lock and selection state, uses the game's own
+accessors and number formatters, and activates a resource by dispatching a real
+click on the legacy row — so a card can never disagree with the game.
 
 See [`docs/`](docs/) for the full analysis:
 
 - [`docs/LEGACY_ARCHITECTURE.md`](docs/LEGACY_ARCHITECTURE.md) — how the legacy game is wired.
 - [`docs/SAVE_COMPATIBILITY.md`](docs/SAVE_COMPATIBILITY.md) — storage keys, save schema, invariants.
-- [`docs/UI_DOM_CONTRACT.md`](docs/UI_DOM_CONTRACT.md) — DOM IDs/classes the legacy code depends on (M1 preserves these).
+- [`docs/UI_DOM_CONTRACT.md`](docs/UI_DOM_CONTRACT.md) — DOM IDs/classes the legacy code depends on (M1/M2 preserve these).
 - [`docs/MODERNIZATION_ROADMAP.md`](docs/MODERNIZATION_ROADMAP.md) — milestones M0–M8.
-- [`docs/VISUAL_DIRECTION.md`](docs/VISUAL_DIRECTION.md) — the premium sci-fi visual language + implemented tokens.
+- [`docs/VISUAL_DIRECTION.md`](docs/VISUAL_DIRECTION.md) — the premium sci-fi visual language + implemented tokens and cards.
 - [`docs/M1_VISUAL_ACCEPTANCE.md`](docs/M1_VISUAL_ACCEPTANCE.md) — M1 verification, screenshots, deferrals.
+- [`docs/M2_RESOURCE_DASHBOARD.md`](docs/M2_RESOURCE_DASHBOARD.md) — M2 verification, parity evidence, screenshots.
 - [`docs/PRIVACY.md`](docs/PRIVACY.md) — tracking removed and remaining network calls.
 - [`docs/RISK_REGISTER.md`](docs/RISK_REGISTER.md) — risks identified during forensics.
 
 ### UI modes
 
-- **Default (modern):** the command-center shell — open the game normally.
-- **Legacy fallback:** append `?ui=legacy` to the URL to render the original
-  Bootstrap presentation. This is a diagnostic escape hatch; it is read from the
-  URL each load and is **never** written to your save.
+- **Default (modern):** the command-center shell with the resource dashboard —
+  open the game normally.
+- **Legacy resource list:** append `?resources=legacy` to keep the modern shell
+  but restore the original resource table.
+- **Legacy fallback:** append `?ui=legacy` to render the original Bootstrap
+  presentation wholesale (this also restores the legacy resource table).
+
+Both switches are diagnostic escape hatches: they are read from the URL each
+load and are **never** written to your save. The only preference the modern UI
+stores is resource-card density, under its own `sc.ui.resourceDensity` key.
 
 ## Requirements
 
@@ -107,7 +121,9 @@ and import/export round-trip — so future refactors can't silently change them.
 | --- | --- |
 | `gh-pages` | The currently **deployable legacy branch** (GitHub Pages). Left untouched. |
 | `dev` | Inherited integration branch. |
-| `feature/m0-modernization-foundation` | This milestone's work branch. |
+| `feature/m0-modernization-foundation` | M0 — tooling, characterization tests, docs. |
+| `feature/m1-premium-command-center-shell` | M1 — design system and command-center shell. |
+| `feature/m2-resource-operations-dashboard` | This milestone's work branch. |
 
 Modernization work happens on `feature/*` branches and is **not** merged into
 `dev` or `gh-pages` without review. `gh-pages` remains the source of truth for

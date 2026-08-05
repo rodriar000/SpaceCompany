@@ -12,6 +12,20 @@ loudly.
   **not** compressed.
 - There is no versioned or namespaced key. A single slot per browser origin.
 
+### Non-save keys (presentation preferences)
+
+First-party modern UI code may store **presentation preferences** under the
+`sc.ui.*` namespace. These are not game state, are never merged into the save
+object, and their loss only resets a display choice:
+
+| Key | Written by | Meaning |
+| --- | --- | --- |
+| `sc.ui.resourceDensity` | `ui/modern/resourceDashboard.js` (M2) | `comfortable` \| `compact` — resource-card density. |
+
+Rules: modern UI modules must **never** read or write `localStorage["save"]`,
+and must tolerate storage being unavailable (private mode) without breaking.
+Enforced by `test/resourceDashboard.test.mjs` and `test/uiModeSwitch.test.mjs`.
+
 ## Save object structure
 
 `Game.save()` (`game.js:133`) builds one flat-ish object from two sources:
