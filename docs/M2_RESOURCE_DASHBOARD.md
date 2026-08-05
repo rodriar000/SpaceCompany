@@ -87,11 +87,15 @@ Consequences worth stating plainly:
 ## Tested viewports — EXACT
 
 Validated with **puppeteer-core driving the system Google Chrome** (headless,
-`page.setViewport` sets the true CSS viewport). Each row's `innerWidth`/
-`innerHeight` were read from the live page and match the request exactly. The
-QA harness lives in scratchpad and is not committed / not in the dependency
-graph. "Parity" = card value vs. its legacy row's data-bound span, for every
-visible resource.
+`page.setViewport` sets the true CSS viewport), against the **deployed** site in
+an isolated browser context per case. Each row's `innerWidth`/`innerHeight` were
+read from the live page and match the request exactly. The QA harness lives in
+scratchpad and is not committed / not in the dependency graph. "Parity" = card
+value vs. its legacy row's data-bound span, for every visible resource.
+
+The deployed build was confirmed to be the reviewed commit by fetching **all 74
+tracked JS/CSS/HTML/JSON assets** and comparing SHA-256 against the git blobs:
+74 identical, 0 different.
 
 | Requested | actual innerWxH | scrollWidth | H-overflow | state | cards shown | off-screen cards | parity mismatches | console | net |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -105,6 +109,10 @@ visible resource.
 | 768×1024 | 768×1024 | 768 | ✅ none | progressed | 19 | none | 0 | 0 err | 0 / 0 |
 | 390×844 | 390×844 | 390 | ✅ none | progressed | 19 | none | 0 | 0 err | 0 / 0 |
 | 360×800 | 360×800 | 360 | ✅ none | progressed | 19 | none | 0 | 0 err | 0 / 0 |
+| 1440×900 | 1440×900 | 1440 | ✅ none | **late game** | 19 | none | 0 | 0 err | 0 / 0 |
+| 390×844 | 390×844 | 390 | ✅ none | **late game** | 19 | none | 0 | 0 err | 0 / 0 |
+
+No card overlapped another and no card escaped the viewport in any case.
 
 Minimum card height: **119 px** on desktop/tablet, **61–62 px** on phones — the
 dense row form stays well above the 44 px touch-target floor.
@@ -140,10 +148,36 @@ by the real economy. Never a real player's save.
   in either state, in either fallback mode. No Google-Analytics/Kongregate
   requests (M1's privacy cleanup holds).
 
+## Update mechanism & cost
+
+The dashboard adds **no loop of its own**. It registers a single component in
+`Game.uiComponents`, so `initialise()` runs inside `Game.loadDelay` and
+`update()` runs on the game's existing 100 ms "UI Update" interval. Measured on
+the deployment with `requestAnimationFrame`, `setInterval` and `setTimeout`
+wrapped before any page script ran, cards on vs. cards off:
+
+| | rAF calls / 3 s | `setInterval` calls | interval periods | `Game.intervals` | `uiComponents` |
+| --- | --- | --- | --- | --- | --- |
+| dashboard on | 47 | 1 | `[100]` | Loading Animation, Fast/Slow/UI Update | 7 |
+| `?resources=legacy` | 40 | 1 | `[100]` | *identical* | 7 |
+
+Identical in both: one `setInterval(100)`, one rAF chain, the same four game
+intervals. No second simulation loop, no per-card timer, no extra rAF.
+
+Isolated sync cost (300 warm iterations, 19 unlocked resources):
+
+| state | dashboard sync | legacy bound elements | `Game.fastUpdate` | share of the 100 ms tick |
+| --- | --- | --- | --- | --- |
+| progressed | 1.17 ms | 21.52 ms | 30.38 ms | **1.2 %** |
+| late game | 2.40 ms | 27.25 ms | 33.04 ms | **2.4 %** |
+
+The projection costs roughly **a tenth** of the legacy data-binding layer it
+sits beside, because every DOM write is diffed against a cache first.
+
 ## Automated tests
 
-`npm run verify` (lint → deterministic build → tests): **99 tests, 0 failures**
-(60 before M2; **39 new**).
+`npm run verify` (lint → deterministic build → tests): **111 tests, 0 failures**
+(60 before M2; **51 new**).
 
 - `test/resourceDashboard.test.mjs` (27) — drives the real module against a
   legacy-shaped fixture in a `vm` sandbox: projection order and grouping,
@@ -166,22 +200,36 @@ by the real economy. Never a real player's save.
   so first-party presentation scripts can be executed under `node --test`.
 - `test/modernShell.test.mjs` extended: the new CSS/JS assets are covered by the
   asset-existence check and by the `.hidden`-contract scan.
+- `test/packageMetadata.test.mjs` (6) — added during the deployed review, after
+  the root licence was found to disagree between `package.json`
+  (`SEE LICENSE IN LICENCE.txt`) and `package-lock.json` (`MIT`). npm refreshes
+  the lockfile's copy of the root fields only on regeneration and `npm ci` does
+  **not** flag the mismatch, so the drift was silent. The lockfile was
+  reconciled with `npm install --package-lock-only` (no hand-editing) and these
+  assertions now pin name/version/licence agreement, that the referenced licence
+  file exists and still carries the original author's copyright, that the
+  project installs nothing, and that `.nvmrc` satisfies `engines.node`.
 
 ## Screenshots (in `docs/screenshots/`)
 
-Exact-viewport captures, system Chrome via puppeteer-core, retina @2×.
+Exact-viewport captures taken from the **deployed** build at
+<https://spacecompany-rodrigo.pages.dev>, in an isolated browser context per
+shot, system Chrome via puppeteer-core, retina @2×. All post-correction.
 
 | File | Viewport | State | Notes |
 | --- | --- | --- | --- |
-| `final-m2-cards-1440x900.jpg` | 1440×900 | fresh | Three unlocked resources, empty-state hint. |
-| `final-m2-cards-progressed-1440x900.jpg` | 1440×900 | progressed | All 19 cards, four category groups, live rates and ETAs. |
-| `final-m2-cards-selected-1440x900.jpg` | 1440×900 | progressed | Metal selected — cyan card, hint dismissed. |
-| `final-m2-cards-compact-1440x900.jpg` | 1440×900 | progressed | Compact density: 19 resources in dense rows. |
-| `final-m2-cards-1024x768.jpg` | 1024×768 | progressed | Compact desktop / tablet. |
-| `final-m2-cards-768x1024.jpg` | 768×1024 | progressed | Tablet portrait (ETA line drops). |
-| `final-m2-cards-390x844.jpg` | 390×844 | progressed | Phone: single-column dense rows. |
-| `final-m2-cards-360x800.jpg` | 360×800 | progressed | Narrowest phone. |
-| `final-m2-legacy-fallback-1440x900.jpg` | 1440×900 | fresh | `?resources=legacy` — modern shell, legacy table. |
+| `m2-final-fresh-1440x900.jpg` | 1440×900 | fresh | Three unlocked resources, empty-state hint. |
+| `m2-final-progressed-1440x900.jpg` | 1440×900 | progressed | All 19 cards, four category groups, live rates and ETAs. |
+| `m2-final-lategame-1440x900.jpg` | 1440×900 | late game | Huge values and multi-year ETAs — nothing truncated. |
+| `m2-final-selected-1440x900.jpg` | 1440×900 | late game | Metal selected — cyan card, hint dismissed, detail panel below. |
+| `m2-final-compact-1440x900.jpg` | 1440×900 | late game | Compact density: 19 resources + detail panel on one screen, full names. |
+| `m2-final-progressed-1024x768.jpg` | 1024×768 | progressed | Compact desktop / tablet. |
+| `m2-final-progressed-768x1024.jpg` | 768×1024 | progressed | Tablet portrait (ETA line drops). |
+| `m2-final-progressed-390x844.jpg` | 390×844 | progressed | Phone: single-column dense rows. |
+| `m2-final-lategame-390x844.jpg` | 390×844 | late game | Phone at late-game magnitudes. |
+| `m2-final-progressed-360x800.jpg` | 360×800 | progressed | Narrowest phone. |
+| `m2-final-fallback-resources-legacy-1440x900.jpg` | 1440×900 | progressed | `?resources=legacy` — modern shell, legacy table. |
+| `m2-final-fallback-ui-legacy-1440x900.jpg` | 1440×900 | progressed | `?ui=legacy` — original Bootstrap presentation. |
 
 ## Accessibility notes
 
@@ -194,10 +242,82 @@ Exact-viewport captures, system Chrome via puppeteer-core, retina @2×.
 - Icons are `alt=""` / `aria-hidden` decoration; the resource name is real text.
 - `prefers-reduced-motion: reduce` removes card transitions and the meter tween.
 
+## Deployed review — defects found and corrected
+
+The branch was reviewed as **deployed** (Cloudflare Pages), including a
+**late-game** synthetic state that earlier passes had not exercised. Two genuine
+M2 defects surfaced, both only at late-game magnitudes; both are corrected and
+guarded by tests.
+
+### 1. Truncated ETAs (blocker) — and an inherited years bug behind it
+
+At late-game scale **9 of 9 visible ETAs were ellipsis-clipped** at 1440×900:
+`full in 93 Days 16:53…`, `full in 156 Days 15:5…`. The ETA line had 149 px and
+needed 152–166 px, because both the rate (`+260.000/s`) and the duration grow
+with progression.
+
+Investigating it exposed something worse. `Game.utils.getFullTimeDisplay` prints
+only `splitDateTime()[1]` — the **days remainder after years are extracted** —
+so it silently drops the years component: a 789-year ETA rendered as
+`93 Days 16:53:07`. The truncation was hiding a number that was already wrong by
+centuries.
+
+**Fix:** the card's ETA now reads the same `splitDateTime` decomposition
+directly. Under a day it still defers to `getFullTimeDisplay`, so a card matches
+the detail panel exactly (`04:22:29`). Past a day it compacts —
+`93d 16h`, `789y 93d` — which is both truthful and narrow enough that no ETA can
+clip. The legacy helper itself is **not** modified; the detail panel's
+"time remaining" line is untouched (that inherited quirk is logged below).
+
+Durations under one second are now dropped entirely rather than rendered as
+`full in 00:00:00`, which read as broken rather than as "imminent".
+
+### 2. Truncated resource names in compact density (blocker)
+
+In the dense form at late-game values, names collapsed to `URAN…`, `LUNA…`,
+`METH…`, `TITAN…`: wide values (`1,000Qa / 1,000Qa`) grew the value column and
+the name was the only flexible element, so it absorbed all the squeeze.
+
+**Fix:** in compact density the state **word** yields instead of the name. The
+word is moved to screen-reader-only (`clip-path`, *not* `display:none`, so it is
+still announced) and the state **glyph** stays visible — so state is still not
+carried by colour alone. The name is given `flex: 1 1 auto` so it is the last
+thing to give way.
+
+### Verification of the corrections
+
+A clipping sweep now runs over **every combination** of 5 viewports ×
+{progressed, late game} × {comfortable, compact} = **20 cases**, measuring
+`scrollWidth > clientWidth` on each card's name, value, capacity, rate and ETA:
+
+| | clipped text | h-overflow | parity mismatches |
+| --- | --- | --- | --- |
+| before | 9 (ETA) + 4 (names) | none | 0 |
+| after | **0 / 20 cases** | none | 0 |
+
+### Not M2 defects (recorded, not changed)
+
+- **79 duplicate DOM ids** (`star__<n>_name`) — the inherited interstellar UI
+  renders each star's name `<h3>` in both its travel and conquer tables. The
+  count is **identical (79) with the dashboard present, with `?resources=legacy`
+  and with `?ui=legacy`**, so M2 neither causes nor increases it. M2's own 23
+  ids are unique, as are all `#<res>` / `#<res>ps` / `#<res>Nav` bindings.
+  Belongs to the M4 interstellar work.
+- **`842,0T` / `1,000Qa` number formatting** — `Game.settings.format`'s own
+  locale-dependent output. The card renders exactly what the legacy row renders
+  (0 parity mismatches), so changing it would change both views and is outside a
+  read-only view replacement.
+- **`getFullTimeDisplay` drops years** — still true for the legacy detail panel.
+  Fixing the shared helper would alter legacy output; it is logged here for the
+  milestone that owns that code.
+
 ## Known limitations (intentionally deferred)
 
 - **Live regions.** Values update silently; announcing important transitions
   (storage full, energy deficit) is part of the M5 accessibility pass, not M2.
+- **ETA precision past a day is coarse** (`93d 16h`). That is deliberate — see
+  the deployed-review section — but it means the card and the detail panel show
+  the same duration at different resolutions above 24 h.
 - **No filter/search.** With 19 resources, grouping plus the density toggle is
   enough; a filter belongs with a larger late-game inventory.
 - **The detail panel is still legacy markup.** M2 replaces the resource *list*
