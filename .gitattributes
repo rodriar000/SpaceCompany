@@ -1,0 +1,9 @@
+# The inherited upstream sources (index.html and the legacy game scripts) use
+# CRLF line endings. Preserve them as-is and tell git's whitespace checker to
+# treat the trailing CR as part of the line terminator, so `git diff --check`
+# does not flag CRLF on edited lines — while keeping the other default checks.
+# (First-party M1 files under styles/modern and ui/modern are LF; the rule is a
+# harmless no-op for them.)
+*.html whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.js   whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.css  whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

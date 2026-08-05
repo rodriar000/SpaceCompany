@@ -1,0 +1,302 @@
+/* ============================================================================
+ * Space Company — Modern Design System : LEGACY COMPONENT COMPATIBILITY LAYER
+ *
+ * A cohesive dark skin over Bootstrap 3 + legacy markup. Uses selectors scoped
+ * to html[data-ui="modern"] (attribute+class specificity) so it wins over
+ * Bootstrap without !important except where legacy style.css / inline styles
+ * force it. Never sets display on .hidden elements.
+ * ==========================================================================*/
+
+/* ---- Legacy affordability signalling (preserve + enhance) ----------------- */
+/* style.css declares .red{color:red!important}; use a dark-legible red and add
+   a non-colour weight cue so affordability is not conveyed by hue alone.      */
+html[data-ui="modern"] .red {
+  color: var(--sc-negative) !important;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(255, 93, 108, 0.25);
+}
+html[data-ui="modern"] .green { color: var(--sc-positive) !important; }
+/* .bold already adds underline; keep it as the non-colour emphasis for costs. */
+html[data-ui="modern"] .bold { text-decoration: underline; text-underline-offset: 2px; }
+
+/* Legacy hard-coded white cells would flash white on dark — neutralise. */
+html[data-ui="modern"] .achievementTD { background-color: var(--sc-surface-1) !important; }
+
+/* ---- Buttons -------------------------------------------------------------- */
+html[data-ui="modern"] .btn {
+  border-radius: var(--sc-r-2);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  background: linear-gradient(180deg, var(--sc-surface-3), var(--sc-surface-2));
+  color: var(--sc-text);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 7px 14px;
+  min-height: 34px;
+  transition: background var(--sc-dur-1) var(--sc-ease),
+              border-color var(--sc-dur-1) var(--sc-ease),
+              box-shadow var(--sc-dur-1) var(--sc-ease),
+              transform var(--sc-dur-1) var(--sc-ease);
+  text-shadow: none;
+}
+html[data-ui="modern"] .btn:hover,
+html[data-ui="modern"] .btn:focus {
+  background: linear-gradient(180deg, var(--sc-surface-3), var(--sc-surface-3));
+  border-color: var(--sc-cyan-dim);
+  color: var(--sc-text-strong);
+}
+html[data-ui="modern"] .btn:active { transform: translateY(1px); }
+/* Primary = cyan reactor action. */
+html[data-ui="modern"] .btn-primary,
+html[data-ui="modern"] .btn-info {
+  background: linear-gradient(180deg, var(--sc-cyan-bright), var(--sc-cyan-dim));
+  border-color: var(--sc-cyan);
+  color: var(--sc-space-0);
+}
+html[data-ui="modern"] .btn-primary:hover,
+html[data-ui="modern"] .btn-info:hover { box-shadow: var(--sc-glow-cyan); color: var(--sc-space-0); }
+/* Success = positive. */
+html[data-ui="modern"] .btn-success {
+  background: linear-gradient(180deg, #5ee3a1, #2fae76);
+  border-color: var(--sc-positive); color: var(--sc-space-0);
+}
+/* Warning = amber prestige. */
+html[data-ui="modern"] .btn-warning {
+  background: linear-gradient(180deg, var(--sc-amber-bright), var(--sc-amber-dim));
+  border-color: var(--sc-amber); color: var(--sc-space-0);
+}
+/* Danger / destructive = unmistakable red with a heavier border. */
+html[data-ui="modern"] .btn-danger {
+  background: linear-gradient(180deg, #ff6b78, #d23445);
+  border: var(--sc-bw-2) solid var(--sc-negative);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+html[data-ui="modern"] .btn.disabled,
+html[data-ui="modern"] .btn:disabled,
+html[data-ui="modern"] .btn[disabled] {
+  opacity: 0.45;
+  filter: grayscale(0.3);
+  box-shadow: none;
+  cursor: not-allowed !important;
+}
+html[data-ui="modern"] .btn-group > .btn { border-radius: 0; }
+html[data-ui="modern"] .btn-group > .btn:first-child { border-top-left-radius: var(--sc-r-2); border-bottom-left-radius: var(--sc-r-2); }
+html[data-ui="modern"] .btn-group > .btn:last-child { border-top-right-radius: var(--sc-r-2); border-bottom-right-radius: var(--sc-r-2); }
+
+/* ---- Tables (generic + resource nav) -------------------------------------- */
+html[data-ui="modern"] .table { color: var(--sc-text); margin-bottom: var(--sc-sp-4); }
+html[data-ui="modern"] .table > thead > tr > th {
+  color: var(--sc-text-secondary);
+  border-bottom: var(--sc-bw-1) solid var(--sc-border-strong);
+  text-transform: uppercase;
+  letter-spacing: var(--sc-tracking-label);
+  font-size: var(--sc-fs-xs);
+}
+html[data-ui="modern"] .table > tbody > tr > td,
+html[data-ui="modern"] .table > tbody > tr > th {
+  border-top: var(--sc-bw-1) solid var(--sc-divider);
+}
+html[data-ui="modern"] .table-hover > tbody > tr:hover > td { background: var(--sc-cyan-faint); }
+
+/* Resource navigation rows — light restyle only (full cards belong to M2). */
+html[data-ui="modern"] #resourceNavParent { border-collapse: separate; border-spacing: 0 6px; }
+html[data-ui="modern"] #resourceNavParent > tbody > tr,
+html[data-ui="modern"] #resourceNavParent > tr {
+  background: var(--sc-surface-1);
+  outline: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-2);
+  transition: outline-color var(--sc-dur-1) var(--sc-ease), background var(--sc-dur-1) var(--sc-ease);
+}
+html[data-ui="modern"] #resourceNavParent > tbody > tr:hover,
+html[data-ui="modern"] #resourceNavParent > tr:hover {
+  background: var(--sc-surface-2);
+  outline-color: var(--sc-cyan-dim);
+}
+html[data-ui="modern"] #resourceNavParent tr.active,
+html[data-ui="modern"] #resourceNavParent tr.activeResource {
+  outline-color: var(--sc-cyan);
+  box-shadow: var(--sc-glow-cyan);
+}
+html[data-ui="modern"] #resourceNavParent td { border: none !important; }
+html[data-ui="modern"] #resourceNavParent img { filter: drop-shadow(0 0 4px rgba(0,0,0,0.6)); }
+/* Prominent, tabular resource numbers. */
+html[data-ui="modern"] #resourceNavParent td:last-child span {
+  font-family: var(--sc-font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sc-text-strong);
+  font-size: var(--sc-fs-md);
+}
+html[data-ui="modern"] #resourceNavParent [id$="ps"] { color: var(--sc-cyan); }
+
+/* ---- Panels --------------------------------------------------------------- */
+html[data-ui="modern"] .panel {
+  background: var(--sc-surface-1);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-1);
+}
+html[data-ui="modern"] .panel-heading {
+  background: var(--sc-surface-2);
+  border-bottom: var(--sc-bw-1) solid var(--sc-border);
+  color: var(--sc-text-strong);
+  border-radius: var(--sc-r-3) var(--sc-r-3) 0 0;
+}
+html[data-ui="modern"] .well {
+  background: var(--sc-surface-1);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: none;
+}
+
+/* ---- Forms ---------------------------------------------------------------- */
+html[data-ui="modern"] .form-control,
+html[data-ui="modern"] input[type="text"],
+html[data-ui="modern"] input[type="number"],
+html[data-ui="modern"] textarea,
+html[data-ui="modern"] select {
+  background: var(--sc-space-1);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  border-radius: var(--sc-r-2);
+  color: var(--sc-text);
+  box-shadow: none;
+}
+html[data-ui="modern"] .form-control:focus,
+html[data-ui="modern"] input:focus,
+html[data-ui="modern"] textarea:focus,
+html[data-ui="modern"] select:focus {
+  border-color: var(--sc-cyan);
+  box-shadow: 0 0 0 2px var(--sc-cyan-faint);
+  outline: none;
+}
+html[data-ui="modern"] input[type="checkbox"],
+html[data-ui="modern"] input[type="radio"] { accent-color: var(--sc-cyan); }
+
+/* ---- Dropdowns ------------------------------------------------------------ */
+html[data-ui="modern"] .dropdown-menu {
+  background: var(--sc-surface-2);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  border-radius: var(--sc-r-2);
+  box-shadow: var(--sc-elev-2);
+}
+html[data-ui="modern"] .dropdown-menu > li > a { color: var(--sc-text-secondary); }
+html[data-ui="modern"] .dropdown-menu > li > a:hover { background: var(--sc-surface-3); color: var(--sc-text-strong); }
+
+/* ---- Alerts --------------------------------------------------------------- */
+html[data-ui="modern"] .alert {
+  border-radius: var(--sc-r-2);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  background: var(--sc-surface-2);
+  color: var(--sc-text);
+}
+html[data-ui="modern"] .alert-info { border-color: var(--sc-info); background: var(--sc-info-bg); }
+html[data-ui="modern"] .alert-success { border-color: var(--sc-positive); background: var(--sc-positive-bg); }
+html[data-ui="modern"] .alert-warning { border-color: var(--sc-warning); background: var(--sc-warning-bg); }
+html[data-ui="modern"] .alert-danger { border-color: var(--sc-negative); background: var(--sc-negative-bg); }
+
+/* ---- Modals --------------------------------------------------------------- */
+html[data-ui="modern"] .modal-content {
+  background: var(--sc-surface-1);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-3);
+  color: var(--sc-text);
+}
+html[data-ui="modern"] .modal-header,
+html[data-ui="modern"] .modal-footer { border-color: var(--sc-divider); }
+html[data-ui="modern"] .modal-backdrop.in { opacity: 0.7; background: #02040a; }
+
+/* ---- Tooltips ------------------------------------------------------------- */
+html[data-ui="modern"] .tooltip-inner {
+  background: var(--sc-surface-3);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  color: var(--sc-text-strong);
+  border-radius: var(--sc-r-2);
+  box-shadow: var(--sc-elev-2);
+  max-width: 260px;
+}
+html[data-ui="modern"] .tooltip.top .tooltip-arrow { border-top-color: var(--sc-border-strong); }
+html[data-ui="modern"] .tooltip.bottom .tooltip-arrow { border-bottom-color: var(--sc-border-strong); }
+
+/* ---- Progress bars (wonders / dyson) -------------------------------------- */
+html[data-ui="modern"] .progress {
+  background: var(--sc-space-1);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-pill);
+  box-shadow: none;
+  height: 20px;
+}
+html[data-ui="modern"] .progress-bar {
+  background: linear-gradient(90deg, var(--sc-cyan-dim), var(--sc-cyan-bright));
+  box-shadow: 0 0 12px -2px var(--sc-cyan-glow);
+  color: var(--sc-space-0);
+  font-weight: 600;
+}
+html[data-ui="modern"] .progress-bar-warning { background: linear-gradient(90deg, var(--sc-amber-dim), var(--sc-amber-bright)); }
+html[data-ui="modern"] .progress-bar-success { background: linear-gradient(90deg, #2fae76, #5ee3a1); }
+
+/* ---- PNotify notifications ------------------------------------------------ */
+/* Containment: anchor each toast to the viewport bottom-right with safe margins
+   and a viewport-aware width, so notifications never clip off any edge. We do
+   NOT override the per-toast bottom/top offsets — PNotify keeps stacking them. */
+html[data-ui="modern"] .ui-pnotify {
+  position: fixed !important;
+  right: 16px !important;
+  left: auto !important;
+  width: min(340px, calc(100vw - 32px)) !important;
+  max-width: calc(100vw - 32px) !important;
+  z-index: 1000;
+}
+/* Long titles/messages wrap safely instead of forcing width. */
+html[data-ui="modern"] .ui-pnotify .ui-pnotify-title,
+html[data-ui="modern"] .ui-pnotify .ui-pnotify-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+/* Compact toasts so a burst of simultaneous achievements stays short and does
+   not blanket the screen / climb into the navigation. */
+html[data-ui="modern"] .ui-pnotify .alert { padding: 9px 13px; }
+html[data-ui="modern"] .ui-pnotify-title { font-size: var(--sc-fs-sm); margin-bottom: 2px; line-height: 1.2; }
+html[data-ui="modern"] .ui-pnotify-text { font-size: var(--sc-fs-xs); line-height: 1.3; }
+html[data-ui="modern"] .ui-pnotify .alert {
+  background: var(--sc-surface-glass);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  border-left-width: 3px;
+  border-radius: var(--sc-r-2);
+  box-shadow: var(--sc-elev-2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--sc-text);
+}
+html[data-ui="modern"] .ui-pnotify .alert-info { border-left-color: var(--sc-info); }
+html[data-ui="modern"] .ui-pnotify .alert-success { border-left-color: var(--sc-positive); }
+html[data-ui="modern"] .ui-pnotify .alert-warning { border-left-color: var(--sc-warning); }
+html[data-ui="modern"] .ui-pnotify-title { color: var(--sc-text-strong); font-weight: 700; }
+
+/* ---- Text utility colours from legacy Bootstrap --------------------------- */
+html[data-ui="modern"] .text-muted { color: var(--sc-text-muted) !important; }
+html[data-ui="modern"] .text-primary { color: var(--sc-text) !important; }
+html[data-ui="modern"] .text-success { color: var(--sc-positive) !important; }
+html[data-ui="modern"] .text-danger { color: var(--sc-negative) !important; }
+html[data-ui="modern"] .text-warning { color: var(--sc-warning) !important; }
+
+/* ========================================================================== *
+ * REUSABLE STATUS STATES  (for shell + future screens; opt-in classes)
+ * Colour is always paired with border/weight/label so it is never hue-alone.
+ * ========================================================================== */
+html[data-ui="modern"] .sc-state {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 10px; border-radius: var(--sc-r-pill);
+  font-size: var(--sc-fs-xs); font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  border: var(--sc-bw-1) solid currentColor;
+}
+html[data-ui="modern"] .sc-state--active   { color: var(--sc-cyan);     background: var(--sc-cyan-faint); }
+html[data-ui="modern"] .sc-state--available{ color: var(--sc-amber);    background: var(--sc-amber-glow); }
+html[data-ui="modern"] .sc-state--warning  { color: var(--sc-warning);  background: var(--sc-warning-bg); }
+html[data-ui="modern"] .sc-state--deficit  { color: var(--sc-negative); background: var(--sc-negative-bg); }
+html[data-ui="modern"] .sc-state--full     { color: var(--sc-warning);  background: var(--sc-warning-bg); }
+html[data-ui="modern"] .sc-state--affordable   { color: var(--sc-positive); background: var(--sc-positive-bg); }
+html[data-ui="modern"] .sc-state--unaffordable { color: var(--sc-negative); background: var(--sc-negative-bg); }
+html[data-ui="modern"] .sc-state--locked   { color: var(--sc-text-muted); background: transparent; }
+html[data-ui="modern"] .sc-state::before { content: "●"; font-size: 8px; }
+html[data-ui="modern"] .sc-state--locked::before { content: "🔒"; font-size: 10px; }

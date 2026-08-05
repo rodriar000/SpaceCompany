@@ -1,0 +1,82 @@
+/* ============================================================================
+ * Space Company — Modern Design System : RESPONSIVE SHELL
+ *
+ * Targets 1440/1024/768/390/360 wide. The page body never scrolls
+ * horizontally; genuinely wide legacy content scrolls inside its own region.
+ * Scoped to html[data-ui="modern"].
+ * ==========================================================================*/
+
+/* ---- Compact desktop / tablet (<= 1024px) --------------------------------- */
+@media (max-width: 1024px) {
+  html[data-ui="modern"] #game.container { width: 96% !important; padding: var(--sc-sp-3) var(--sc-sp-3) var(--sc-sp-7); }
+  html[data-ui="modern"] #tabContent { padding: var(--sc-sp-4); }
+}
+
+/* ---- Tablet portrait (<= 768px) ------------------------------------------- */
+@media (max-width: 768px) {
+  html[data-ui="modern"] .navbar-default .navbar-header {
+    min-height: 0;
+    padding: var(--sc-sp-2) var(--sc-sp-1);
+    row-gap: 2px;
+  }
+  /* Company name + version stay on the first line; the rest wraps beneath. */
+  html[data-ui="modern"] .navbar-brand.page-title { font-size: var(--sc-fs-md); }
+  html[data-ui="modern"] .navbar-default .pull-right { width: auto !important; margin-left: auto; }
+  html[data-ui="modern"] #tabList.nav-tabs > li > a { padding: var(--sc-sp-2) var(--sc-sp-3); }
+}
+
+/* ---- Mobile (<= 480px) ---------------------------------------------------- */
+@media (max-width: 480px) {
+  html[data-ui="modern"] #game.container { width: 100% !important; padding: var(--sc-sp-2) var(--sc-sp-2) var(--sc-sp-6); }
+  html[data-ui="modern"] .navbar.navbar-default { border-radius: var(--sc-r-2); margin-bottom: var(--sc-sp-3); }
+  /* Reclaim vertical space: tighter header, smaller brand + favicon. */
+  html[data-ui="modern"] .navbar-default .navbar-header {
+    min-height: 0;
+    padding: var(--sc-sp-1) 0;
+    gap: var(--sc-sp-1) var(--sc-sp-2);
+  }
+  html[data-ui="modern"] .navbar-default .navbar-brand { padding: 2px var(--sc-sp-1); }
+  html[data-ui="modern"] .navbar-brand img[src*="Favicon"] { width: 26px !important; height: 26px !important; }
+  html[data-ui="modern"] .navbar-brand.page-title { font-size: var(--sc-fs-base); letter-spacing: 0.04em; }
+  html[data-ui="modern"] #versionLabel { font-size: 10px !important; padding: 1px var(--sc-sp-1); }
+
+  /* Discord promo is non-essential on tiny screens — hide it, keep everything
+     gameplay-relevant (identity, version, energy deficit, autosave). */
+  html[data-ui="modern"] .navbar-brand[href*="discord"] { display: none; }
+
+  /* Nav becomes a horizontally scrollable command strip (no hover-only menus).
+     Touch targets stay >= 44px tall. */
+  /* Mobile navigation WRAPS into rows so every unlocked item is fully visible
+     and tappable — no clipping, no hover-only menus, no reliance on horizontal
+     scroll discovery. (Replaces the scroll strip, which clipped "More..." once
+     Research unlocked.) */
+  html[data-ui="modern"] #tabList.nav-tabs {
+    border-radius: var(--sc-r-2);
+    padding: 4px;
+    gap: 4px;
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+  html[data-ui="modern"] #tabList.nav-tabs > li > a { min-height: 44px; padding: var(--sc-sp-2) var(--sc-sp-3); font-size: var(--sc-fs-xs); }
+  /* Neutralise the desktop pull-right auto-margin so wrapped items pack cleanly. */
+  html[data-ui="modern"] #tabList.nav-tabs > li.pull-right { margin-left: 0; }
+
+  html[data-ui="modern"] #tabContent { padding: var(--sc-sp-3); border-radius: var(--sc-r-2); }
+
+  /* Keep the resource list readable: constrain the fixed-width legacy container
+     so it fits and its own numbers stay aligned. Full responsive cards = M2. */
+  html[data-ui="modern"] #resources .container.col-xs-1 { width: 100% !important; float: none !important; }
+  html[data-ui="modern"] #resourceNavParent td:last-child span { font-size: var(--sc-fs-base); }
+
+  /* Primary interactive controls get a comfortable touch target. */
+  html[data-ui="modern"] .btn { min-height: 40px; }
+}
+
+/* ---- Very narrow mobile (<= 360px) ---------------------------------------- */
+@media (max-width: 360px) {
+  html[data-ui="modern"] .navbar-brand.page-title { font-size: var(--sc-fs-sm); }
+  html[data-ui="modern"] #resourceNavParent td { padding: 6px 4px; }
+}
+
+/* ---- Legacy fixed-width resource column: never force page overflow --------- */
+html[data-ui="modern"] #resources > .container.col-xs-1 { max-width: 100%; }

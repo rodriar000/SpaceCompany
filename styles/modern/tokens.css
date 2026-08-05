@@ -1,0 +1,124 @@
+/* ============================================================================
+ * Space Company — Modern Design System : DESIGN TOKENS
+ * Rodrigo's modernization fork (M1). Source of truth: docs/VISUAL_DIRECTION.md
+ *
+ * Dark, cinematic, space-industrial command-center identity. Components consume
+ * these semantic tokens — never scattered literal colours. All tokens live on
+ * :root so both the modern shell and any future screen share one vocabulary.
+ * ==========================================================================*/
+
+:root {
+  /* --- Deep-space canvas & surfaces (graphite / navy / deep space) --- */
+  --sc-space-0: #04060c;   /* void — deepest background */
+  --sc-space-1: #070b14;   /* canvas base */
+  --sc-navy-1:  #0a1122;   /* radial field tint */
+  --sc-surface-1: #0d1524; /* primary panel */
+  --sc-surface-2: #121c30; /* elevated panel */
+  --sc-surface-3: #18243b; /* raised / hover */
+  --sc-surface-glass: rgba(18, 28, 48, 0.72); /* glass header/panels */
+
+  /* --- Borders, dividers, engineered hairlines --- */
+  --sc-border:        rgba(126, 166, 214, 0.16);
+  --sc-border-strong: rgba(126, 166, 214, 0.30);
+  --sc-divider:       rgba(126, 166, 214, 0.10);
+  --sc-inner-highlight: rgba(180, 214, 255, 0.06); /* top-edge sheen */
+
+  /* --- Text --- */
+  --sc-text:        #e7eef8;
+  --sc-text-strong: #f4f8ff;
+  --sc-text-secondary: #a9b8cc;
+  --sc-text-muted:  #6d7f97;
+  --sc-text-on-accent: #04121a;
+
+  /* --- Reactor cyan accent (interactive / active) --- */
+  --sc-cyan:       #35e0d6;
+  --sc-cyan-bright:#5cf2e9;
+  --sc-cyan-dim:   #1f9fa8;
+  --sc-cyan-glow:  rgba(53, 224, 214, 0.35);
+  --sc-cyan-faint: rgba(53, 224, 214, 0.12);
+
+  /* --- Amber / gold prestige accent (wonders, prestige, premium) --- */
+  --sc-amber:      #f5b544;
+  --sc-amber-bright:#ffcf73;
+  --sc-amber-dim:  #c98a24;
+  --sc-amber-glow: rgba(245, 181, 68, 0.30);
+
+  /* --- Semantic state colours (never colour-alone; pair with icon/label) --- */
+  --sc-positive: #47d98d;
+  --sc-positive-bg: rgba(71, 217, 141, 0.12);
+  --sc-negative: #ff5d6c;
+  --sc-negative-bg: rgba(255, 93, 108, 0.14);
+  --sc-warning:  #f5b544;
+  --sc-warning-bg: rgba(245, 181, 68, 0.14);
+  --sc-info:     #5aa9e6;
+  --sc-info-bg:  rgba(90, 169, 230, 0.14);
+
+  /* --- Focus ring (always visible, non-colour-alone safe) --- */
+  --sc-focus: #5cf2e9;
+  --sc-focus-ring: 0 0 0 2px var(--sc-space-1), 0 0 0 4px var(--sc-focus);
+
+  /* --- Typography families (system-first with graceful remote fallback) --- */
+  --sc-font-display: 'Orbitron', 'Eurostile', 'Bank Gothic', var(--sc-font-ui);
+  --sc-font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --sc-font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* --- Type scale (~1.2 ratio, restrained) --- */
+  --sc-fs-xs: 11px;
+  --sc-fs-sm: 12.5px;
+  --sc-fs-base: 14px;
+  --sc-fs-md: 16px;
+  --sc-fs-lg: 19px;
+  --sc-fs-xl: 24px;
+  --sc-fs-2xl: 32px;
+  --sc-fs-display: 40px;
+  --sc-lh-tight: 1.15;
+  --sc-lh-base: 1.5;
+  --sc-tracking-display: 0.14em;
+  --sc-tracking-label: 0.08em;
+
+  /* --- Spacing scale (4px / 8px grid) --- */
+  --sc-sp-0: 0;
+  --sc-sp-1: 4px;
+  --sc-sp-2: 8px;
+  --sc-sp-3: 12px;
+  --sc-sp-4: 16px;
+  --sc-sp-5: 24px;
+  --sc-sp-6: 32px;
+  --sc-sp-7: 48px;
+  --sc-sp-8: 64px;
+
+  /* --- Radius scale (small, engineered — not pill-soft) --- */
+  --sc-r-1: 3px;
+  --sc-r-2: 5px;
+  --sc-r-3: 8px;
+  --sc-r-pill: 999px;
+
+  /* --- Border widths --- */
+  --sc-bw-1: 1px;
+  --sc-bw-2: 2px;
+
+  /* --- Elevation (subtle layering, not heavy shadow) --- */
+  --sc-elev-1: 0 1px 0 var(--sc-inner-highlight) inset, 0 2px 8px rgba(0, 0, 0, 0.35);
+  --sc-elev-2: 0 1px 0 var(--sc-inner-highlight) inset, 0 8px 24px rgba(0, 0, 0, 0.45);
+  --sc-elev-3: 0 1px 0 var(--sc-inner-highlight) inset, 0 16px 48px rgba(0, 0, 0, 0.55);
+  --sc-glow-cyan: 0 0 0 1px var(--sc-cyan-faint), 0 0 18px -6px var(--sc-cyan-glow);
+
+  /* --- Motion --- */
+  --sc-dur-1: 120ms;
+  --sc-dur-2: 200ms;
+  --sc-dur-3: 360ms;
+  --sc-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --sc-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Layout dimensions --- */
+  --sc-header-h: 60px;
+  --sc-nav-h: 52px;
+  --sc-content-max: 1600px;
+  --sc-workspace-pad: var(--sc-sp-5);
+
+  /* --- Responsive breakpoints (documented; used via media queries) --- */
+  --sc-bp-mobile: 480px;
+  --sc-bp-tablet: 768px;
+  --sc-bp-compact: 1024px;
+  --sc-bp-desktop: 1280px;
+}

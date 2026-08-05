@@ -1,0 +1,314 @@
+/* ============================================================================
+ * Space Company — Modern Design System : COMMAND-CENTER SHELL
+ *
+ * Transforms the legacy navbar / nav-tabs / tab-content into a cohesive command
+ * center by RESTYLING the existing markup — no DOM identifiers are changed, and
+ * .hidden / inline display:none visibility is never overridden, so locked tabs
+ * and resources stay hidden. Scoped to html[data-ui="modern"].
+ * ==========================================================================*/
+
+/* ---- Root game container as the command-center frame ---------------------- */
+html[data-ui="modern"] #game.container {
+  width: min(96%, var(--sc-content-max)) !important;
+  margin: 0 auto !important;
+  padding: var(--sc-sp-4) var(--sc-sp-4) var(--sc-sp-8);
+}
+
+/* ========================================================================== *
+ * 1. GLOBAL COMMAND HEADER  (legacy .navbar.navbar-default)
+ * ========================================================================== */
+html[data-ui="modern"] .navbar.navbar-default {
+  background: linear-gradient(180deg, var(--sc-surface-2), var(--sc-surface-1));
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-2);
+  margin-bottom: var(--sc-sp-4);
+  position: relative;
+  overflow: hidden;
+}
+/* Instrument sheen + reactor edge line along the top of the header. */
+html[data-ui="modern"] .navbar.navbar-default::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sc-cyan), var(--sc-amber), transparent);
+  opacity: 0.7;
+}
+html[data-ui="modern"] .navbar.navbar-default > .container {
+  width: 100%;
+  padding: 0 var(--sc-sp-4);
+}
+html[data-ui="modern"] .navbar-default .navbar-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-sp-2);
+  flex-wrap: wrap;
+  height: auto !important;
+  min-height: var(--sc-header-h);
+  padding: var(--sc-sp-2) 0;
+}
+html[data-ui="modern"] .navbar-default .navbar-brand {
+  height: auto;
+  padding: var(--sc-sp-1) var(--sc-sp-2);
+  display: inline-flex;
+  align-items: center;
+  color: var(--sc-text-secondary);
+}
+/* Company identity — spacecraft nameplate. */
+html[data-ui="modern"] .navbar-brand.page-title {
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-lg);
+  letter-spacing: 0.06em;
+  color: var(--sc-text-strong) !important;
+  text-transform: uppercase;
+}
+html[data-ui="modern"] .navbar-brand.page-title #companyName {
+  color: var(--sc-cyan);
+  text-shadow: 0 0 14px var(--sc-cyan-glow);
+}
+html[data-ui="modern"] .navbar-brand img[src*="Favicon"] {
+  width: 34px !important;
+  height: 34px !important;
+  margin: 0 !important;
+  /* The inherited favicon is a dark planet mark — invisible on the dark header.
+     brightness(0) invert(1) renders it as a clean white mark (matching the
+     wordmark), then a cyan glow ties it to the reactor identity. */
+  filter: brightness(0) invert(1) drop-shadow(0 0 6px var(--sc-cyan-glow));
+}
+/* Version chip. */
+html[data-ui="modern"] #versionLabel {
+  display: inline-block;
+  padding: 2px var(--sc-sp-2);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  border-radius: var(--sc-r-pill);
+  color: var(--sc-text-secondary) !important;
+  font-size: var(--sc-fs-xs) !important;
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+}
+/* Energy-deficit warning — instrumentation alert pill (icon + colour + text). */
+html[data-ui="modern"] #energyLow {
+  color: var(--sc-negative) !important;
+  background: var(--sc-negative-bg);
+  border: var(--sc-bw-1) solid var(--sc-negative);
+  border-radius: var(--sc-r-pill);
+  padding: 2px var(--sc-sp-2) 2px 22px;
+  font-weight: 600;
+  font-size: var(--sc-fs-xs) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  position: relative;
+}
+html[data-ui="modern"] #energyLow::before {
+  content: "⚠";
+  position: absolute;
+  left: 7px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+}
+/* Autosave/status readout — right-aligned telemetry. */
+html[data-ui="modern"] .navbar-default .pull-right #autoSaveTimer {
+  color: var(--sc-text-muted) !important;
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-fs-sm) !important;
+  letter-spacing: 0.02em;
+}
+/* Discord link stays subtle. */
+html[data-ui="modern"] .navbar-brand[href*="discord"] .text-muted { color: var(--sc-text-muted); }
+
+/* ========================================================================== *
+ * 2. PRIMARY NAVIGATION  (legacy ul#tabList.nav-tabs) -> command strip
+ *    display:flex on the UL only; hidden <li> (.hidden / inline display:none)
+ *    are removed from flex layout automatically, so locked tabs stay hidden.
+ * ========================================================================== */
+html[data-ui="modern"] #tabList.nav-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--sc-sp-1);
+  flex-wrap: nowrap;
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  background: linear-gradient(180deg, var(--sc-surface-2), var(--sc-surface-1));
+  box-shadow: var(--sc-elev-1);
+  padding: var(--sc-sp-1);
+  margin-bottom: var(--sc-sp-4);
+  overflow-x: auto;             /* compact, scrollable strip on narrow screens */
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+html[data-ui="modern"] #tabList.nav-tabs > li {
+  float: none;
+  margin: 0;
+}
+html[data-ui="modern"] #tabList.nav-tabs > li.pull-right { margin-left: auto; }
+html[data-ui="modern"] #tabList.nav-tabs > li + li.pull-right { margin-left: auto; }
+html[data-ui="modern"] #tabList.nav-tabs > li > a {
+  border: var(--sc-bw-1) solid transparent;
+  border-radius: var(--sc-r-2);
+  color: var(--sc-text-secondary);
+  background: transparent;
+  padding: var(--sc-sp-2) var(--sc-sp-4);
+  margin: 0;
+  font-size: var(--sc-fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  transition: color var(--sc-dur-1) var(--sc-ease),
+              background var(--sc-dur-1) var(--sc-ease),
+              border-color var(--sc-dur-1) var(--sc-ease);
+}
+html[data-ui="modern"] #tabList.nav-tabs > li > a:hover {
+  color: var(--sc-text-strong);
+  background: var(--sc-surface-3);
+  border-color: var(--sc-border);
+}
+html[data-ui="modern"] #tabList.nav-tabs > li.active > a,
+html[data-ui="modern"] #tabList.nav-tabs > li.active > a:hover,
+html[data-ui="modern"] #tabList.nav-tabs > li.active > a:focus {
+  color: var(--sc-space-0);
+  background: linear-gradient(180deg, var(--sc-cyan-bright), var(--sc-cyan-dim));
+  border-color: var(--sc-cyan);
+  box-shadow: var(--sc-glow-cyan);
+}
+/* Notification glyph on a tab (unlock / new). Kept hidden when .hidden. */
+html[data-ui="modern"] #tabList .glyphicon-exclamation-sign {
+  color: var(--sc-amber);
+  text-shadow: 0 0 8px var(--sc-amber-glow);
+  font-size: 11px;
+}
+html[data-ui="modern"] #tabList > li.active .glyphicon-exclamation-sign { color: var(--sc-space-0); }
+
+/* ========================================================================== *
+ * 3. WORKSPACE  (legacy .tab-content#tabContent)
+ * ========================================================================== */
+html[data-ui="modern"] #tabContent {
+  background: var(--sc-surface-glass);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-2);
+  padding: var(--sc-sp-5);
+  /* Hug the content: a modest floor keeps the workspace substantial without
+     forcing a large empty glass box early-game — the deep-space canvas fills
+     the area below the panel intentionally. flow-root contains the legacy
+     float-based resource column so the panel expands to hold it (no clipping,
+     unlike overflow:hidden). */
+  min-height: 220px;
+  display: flow-root;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+/* Section heading rhythm for legacy headings inside the workspace. */
+html[data-ui="modern"] #tabContent h2,
+html[data-ui="modern"] #tabContent h3 {
+  font-family: var(--sc-font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: var(--sc-fs-md);
+  color: var(--sc-text-strong);
+  padding-bottom: var(--sc-sp-2);
+  margin: 0 0 var(--sc-sp-4);
+  border-bottom: var(--sc-bw-1) solid var(--sc-divider);
+}
+/* Genuinely wide legacy tables scroll inside their own container, never the page. */
+html[data-ui="modern"] #tabContent .table-responsive,
+html[data-ui="modern"] #tabContent .sc-wide {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ========================================================================== *
+ * 4. CINEMATIC LOADING SCREEN  (legacy #loadScreen — hide contract untouched)
+ * ========================================================================== */
+html[data-ui="modern"] #loadScreen {
+  background:
+    radial-gradient(900px 600px at 50% 30%, rgba(53,224,214,0.10), transparent 60%),
+    radial-gradient(1200px 800px at 50% 120%, rgba(20,40,80,0.5), transparent 60%),
+    linear-gradient(180deg, #060a12, #03050a) !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sc-sp-4);
+  overflow: hidden;
+}
+/* The hide contract: Bootstrap .hidden{display:none!important} still wins. */
+html[data-ui="modern"] #loadScreen.hidden { display: none !important; }
+
+html[data-ui="modern"] #loadScreen > div:first-child { display: none; } /* legacy 3% spacer */
+
+/* Wordmark treatment. */
+html[data-ui="modern"] #loadScreen > div:nth-child(2) {
+  width: auto !important;
+  font-family: var(--sc-font-display) !important;
+  font-size: clamp(34px, 7vw, 64px) !important;
+  letter-spacing: var(--sc-tracking-display) !important;
+  color: var(--sc-text-strong) !important;
+  text-transform: uppercase;
+  text-shadow: 0 0 24px var(--sc-cyan-glow);
+  text-align: center;
+  line-height: 1.1 !important;
+  position: relative;
+  z-index: 2;
+}
+/* Reactor / orbital loader ring around the logo. */
+html[data-ui="modern"] #loadLogo {
+  width: clamp(120px, 22vw, 210px) !important;
+  height: auto !important;
+  filter: drop-shadow(0 0 18px var(--sc-cyan-glow));
+  position: relative;
+  z-index: 2;
+}
+html[data-ui="modern"] .sc-loader-ring {
+  position: relative;
+  width: clamp(150px, 26vw, 250px);
+  height: clamp(150px, 26vw, 250px);
+  margin: var(--sc-sp-2) auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+html[data-ui="modern"] .sc-loader-ring::before,
+html[data-ui="modern"] .sc-loader-ring::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+html[data-ui="modern"] .sc-loader-ring::before {
+  inset: 0;
+  border-top-color: var(--sc-cyan);
+  border-right-color: var(--sc-cyan-faint);
+  box-shadow: 0 0 22px -4px var(--sc-cyan-glow);
+  animation: sc-spin 2.4s linear infinite;
+}
+html[data-ui="modern"] .sc-loader-ring::after {
+  inset: 14px;
+  border-bottom-color: var(--sc-amber);
+  border-left-color: var(--sc-amber-glow);
+  animation: sc-spin 3.6s linear infinite reverse;
+}
+@keyframes sc-spin { to { transform: rotate(360deg); } }
+
+/* Splash text hierarchy. */
+html[data-ui="modern"] #splashText {
+  font-family: var(--sc-font-ui) !important;
+  font-weight: 500 !important;
+  font-size: clamp(14px, 2.4vw, 18px) !important;
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-cyan) !important;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui="modern"] .sc-loader-ring::before,
+  html[data-ui="modern"] .sc-loader-ring::after { animation: none; }
+  html[data-ui="modern"] .sc-loader-ring::before { border-color: var(--sc-cyan) transparent transparent transparent; }
+}

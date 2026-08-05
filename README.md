@@ -21,17 +21,33 @@ compatibility**.
 - **Upstream:** https://github.com/sparticle999/SpaceCompany
 - **This fork:** https://github.com/rodriar000/SpaceCompany
 
-## Status: Milestone M0 — Legacy Baseline & Modernization Foundation
+## Status: Milestone M1 — Premium Sci-Fi Design System & Command-Center Shell
 
-M0 establishes a reproducible local development environment, characterization
-tests around the legacy behaviour, and documentation — **no gameplay, balance,
-progression or save-format changes**. See [`docs/`](docs/) for the full analysis:
+**M0** established a reproducible dev environment, characterization tests and
+documentation. **M1 (this branch)** layers a premium, dark, cinematic
+command-center interface over the legacy game **without changing gameplay,
+balance, progression or the save format** — the modern shell is a CSS layer plus
+a tiny presentation-only script, scoped to `html[data-ui="modern"]`. M1 also
+removes inherited Google Analytics and the Kongregate script. A diagnostic
+`?ui=legacy` fallback renders the original Bootstrap presentation.
+
+See [`docs/`](docs/) for the full analysis:
 
 - [`docs/LEGACY_ARCHITECTURE.md`](docs/LEGACY_ARCHITECTURE.md) — how the legacy game is wired.
 - [`docs/SAVE_COMPATIBILITY.md`](docs/SAVE_COMPATIBILITY.md) — storage keys, save schema, invariants.
+- [`docs/UI_DOM_CONTRACT.md`](docs/UI_DOM_CONTRACT.md) — DOM IDs/classes the legacy code depends on (M1 preserves these).
 - [`docs/MODERNIZATION_ROADMAP.md`](docs/MODERNIZATION_ROADMAP.md) — milestones M0–M8.
-- [`docs/VISUAL_DIRECTION.md`](docs/VISUAL_DIRECTION.md) — proposed premium sci-fi visual language.
+- [`docs/VISUAL_DIRECTION.md`](docs/VISUAL_DIRECTION.md) — the premium sci-fi visual language + implemented tokens.
+- [`docs/M1_VISUAL_ACCEPTANCE.md`](docs/M1_VISUAL_ACCEPTANCE.md) — M1 verification, screenshots, deferrals.
+- [`docs/PRIVACY.md`](docs/PRIVACY.md) — tracking removed and remaining network calls.
 - [`docs/RISK_REGISTER.md`](docs/RISK_REGISTER.md) — risks identified during forensics.
+
+### UI modes
+
+- **Default (modern):** the command-center shell — open the game normally.
+- **Legacy fallback:** append `?ui=legacy` to the URL to render the original
+  Bootstrap presentation. This is a diagnostic escape hatch; it is read from the
+  URL each load and is **never** written to your save.
 
 ## Requirements
 
