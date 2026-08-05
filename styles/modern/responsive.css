@@ -46,11 +46,20 @@
 
   /* Nav becomes a horizontally scrollable command strip (no hover-only menus).
      Touch targets stay >= 44px tall. */
-  html[data-ui="modern"] #tabList.nav-tabs { border-radius: var(--sc-r-2); padding: 4px; gap: 4px; }
+  /* Mobile navigation WRAPS into rows so every unlocked item is fully visible
+     and tappable — no clipping, no hover-only menus, no reliance on horizontal
+     scroll discovery. (Replaces the scroll strip, which clipped "More..." once
+     Research unlocked.) */
+  html[data-ui="modern"] #tabList.nav-tabs {
+    border-radius: var(--sc-r-2);
+    padding: 4px;
+    gap: 4px;
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
   html[data-ui="modern"] #tabList.nav-tabs > li > a { min-height: 44px; padding: var(--sc-sp-2) var(--sc-sp-3); font-size: var(--sc-fs-xs); }
-  /* pull-right items must not jump lines in a scroll strip. */
-  html[data-ui="modern"] #tabList.nav-tabs > li.pull-right { margin-left: 4px; }
-  html[data-ui="modern"] #tabList.nav-tabs > li:nth-last-child(2).pull-right { margin-left: auto; }
+  /* Neutralise the desktop pull-right auto-margin so wrapped items pack cleanly. */
+  html[data-ui="modern"] #tabList.nav-tabs > li.pull-right { margin-left: 0; }
 
   html[data-ui="modern"] #tabContent { padding: var(--sc-sp-3); border-radius: var(--sc-r-2); }
 

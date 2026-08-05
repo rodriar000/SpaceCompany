@@ -71,10 +71,14 @@ html[data-ui="modern"] body::after {
   to   { background-position: 0 0, 0 0, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px, 0 -760px; }
 }
 
-/* Keep all real content above the canvas layers. */
+/* Keep all real content above the canvas layers.
+   NOTE: PNotify notifications are intentionally NOT included here — they rely on
+   their own position:absolute/fixed for stacking, and already sit above the
+   canvas via their own z-index. Forcing position:relative on .ui-pnotify breaks
+   the stack math and drops toasts into document flow. See components.css for the
+   modern notification containment rules. */
 html[data-ui="modern"] #game,
-html[data-ui="modern"] #loadScreen,
-html[data-ui="modern"] .ui-pnotify {
+html[data-ui="modern"] #loadScreen {
   position: relative;
   z-index: 1;
 }

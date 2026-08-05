@@ -235,6 +235,28 @@ html[data-ui="modern"] .progress-bar-warning { background: linear-gradient(90deg
 html[data-ui="modern"] .progress-bar-success { background: linear-gradient(90deg, #2fae76, #5ee3a1); }
 
 /* ---- PNotify notifications ------------------------------------------------ */
+/* Containment: anchor each toast to the viewport bottom-right with safe margins
+   and a viewport-aware width, so notifications never clip off any edge. We do
+   NOT override the per-toast bottom/top offsets — PNotify keeps stacking them. */
+html[data-ui="modern"] .ui-pnotify {
+  position: fixed !important;
+  right: 16px !important;
+  left: auto !important;
+  width: min(340px, calc(100vw - 32px)) !important;
+  max-width: calc(100vw - 32px) !important;
+  z-index: 1000;
+}
+/* Long titles/messages wrap safely instead of forcing width. */
+html[data-ui="modern"] .ui-pnotify .ui-pnotify-title,
+html[data-ui="modern"] .ui-pnotify .ui-pnotify-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+/* Compact toasts so a burst of simultaneous achievements stays short and does
+   not blanket the screen / climb into the navigation. */
+html[data-ui="modern"] .ui-pnotify .alert { padding: 9px 13px; }
+html[data-ui="modern"] .ui-pnotify-title { font-size: var(--sc-fs-sm); margin-bottom: 2px; line-height: 1.2; }
+html[data-ui="modern"] .ui-pnotify-text { font-size: var(--sc-fs-xs); line-height: 1.3; }
 html[data-ui="modern"] .ui-pnotify .alert {
   background: var(--sc-surface-glass);
   border: var(--sc-bw-1) solid var(--sc-border-strong);
