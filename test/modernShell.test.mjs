@@ -100,6 +100,16 @@ test('the .hidden visibility contract is not overridden by modern CSS', () => {
   }
 });
 
+test('the workspace hugs content (no oversized min-height empty box)', () => {
+  const shell = readFileSync(join(ROOT, 'styles/modern/shell.css'), 'utf8');
+  // Guard against regressing #tabContent to a large viewport-height that forces
+  // a big empty glass panel early-game (M1 review polish).
+  const block = /#tabContent\s*\{[^}]*\}/i.exec(shell);
+  assert.ok(block, '#tabContent rule exists');
+  assert.doesNotMatch(block[0], /min-height:\s*[4-9][0-9]vh/i,
+    '#tabContent must not force a large vh min-height');
+});
+
 test('the loading-screen hide contract is respected (only display:none on .hidden)', () => {
   const shell = readFileSync(join(ROOT, 'styles/modern/shell.css'), 'utf8');
   // If shell.css references #loadScreen.hidden it must keep it display:none.
