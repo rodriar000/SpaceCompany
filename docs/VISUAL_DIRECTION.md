@@ -173,7 +173,8 @@ values chosen and where reality deviated from the direction above.
   remapped to a dark-legible `--sc-negative` **plus** a weight/shadow cue so
   affordability is not conveyed by hue alone; `.bold` underline remains.
 - **Resource rows are only lightly restyled** in M1 (surface + tabular numbers).
-  The full resource-card system in this direction is intentionally **M2**.
+  The full resource-card system in this direction is intentionally **M2**
+  (delivered — see below).
 - **Navigation is a horizontal command strip**, not a left rail — a left rail
   would require moving `#tabList` and risk the legacy DOM contract. The strip
   becomes horizontally scrollable on mobile (no hover-only menus).
@@ -182,3 +183,46 @@ values chosen and where reality deviated from the direction above.
 - **Light theme** is described in this direction but M1 ships **dark as the
   canonical identity**; a first-class light theme is deferred to a later
   milestone. Legacy Bootstrap themes remain available via `?ui=legacy`.
+
+---
+
+# Implemented Resource Cards & Deviations (M2)
+
+M2 implemented the "Resource cards" section of this direction in
+`styles/modern/resources.css`, driven by `ui/modern/resourceDashboard.js`.
+Evidence: [M2_RESOURCE_DASHBOARD.md](M2_RESOURCE_DASHBOARD.md).
+
+## Implemented as specified
+
+- Icon + name, **current / capacity** with a linear fill meter, per-second rate
+  in tabular figures coloured by sign, and optional **time-to-full /
+  time-to-empty** as secondary text — the game's own clock helper formats it.
+- Meters always show the number, never just the bar; radial/segmented indicators
+  remain reserved for staged builds (Dyson segments — M3/M4).
+- Cards degrade to a **dense row** form: automatically on phones (≤560px) and on
+  demand at any width via the comfortable/compact density control.
+- Motion is short and purposeful (a 200ms meter tween, 120ms card transitions)
+  and is removed entirely under `prefers-reduced-motion`.
+
+## Deviations / decisions
+
+- **State is a badge, not just a colour.** Each card carries a glyph + word
+  (`▲ Producing`, `▼ Draining`, `◆ Full`, `▬ Idle`) plus a coloured edge strip,
+  and the rate carries an explicit `+`/`−`/`·` sign glyph. This goes beyond
+  "pair with icon or label" because rate sign and storage state are the two
+  places colour-blind players would otherwise be stranded.
+- **Numbers are not reformatted.** Cards render values through the legacy
+  `Game.resourcesUI` delegates rather than a new formatter, so a card and its
+  legacy row can never disagree — including the legacy quirks (Science and
+  Rocket Fuel decimals, the Energy per-second banding).
+- **Grouping comes from the DOM**, not a hardcoded taxonomy: the legacy
+  `collapse*` header rows seed the card groups and supply their titles.
+- **Uncapped resources** (Science, Rocket Fuel: `getStorage() === -1`) show `∞`
+  and no meter, rather than a fake full bar.
+- **No global resource strip in the header yet.** The direction calls for a
+  compact always-visible strip; with the dashboard occupying the Resources tab,
+  a duplicate strip would compete with it. Revisit when M3/M4 make other tabs the
+  common working surface.
+- **Density is persisted outside the save**, under `sc.ui.resourceDensity` — the
+  first use of the `sc.ui.*` presentation-preference namespace anticipated in M1
+  (see SAVE_COMPATIBILITY.md).

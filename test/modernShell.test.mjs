@@ -22,7 +22,9 @@ test('modern design-system assets exist and are referenced by index.html', () =>
     'styles/modern/shell.css',
     'styles/modern/components.css',
     'styles/modern/responsive.css',
+    'styles/modern/resources.css',
     'ui/modern/shell.js',
+    'ui/modern/resourceDashboard.js',
   ];
   for (const a of assets) {
     assert.ok(existsSync(join(ROOT, a)), `${a} must exist`);
@@ -82,7 +84,7 @@ test('primary tab targets and their panes are preserved', () => {
 test('the .hidden visibility contract is not overridden by modern CSS', () => {
   // For any rule whose selector references `.hidden`, the only permitted display
   // value is `none` (anything else would expose locked tabs/resources).
-  for (const css of ['tokens.css', 'base.css', 'shell.css', 'components.css', 'responsive.css']) {
+  for (const css of ['tokens.css', 'base.css', 'shell.css', 'components.css', 'responsive.css', 'resources.css']) {
     // Strip CSS comments so prose that mentions ".hidden" is not parsed as a rule.
     const src = readFileSync(join(ROOT, 'styles/modern', css), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     for (const rule of src.split('}')) {

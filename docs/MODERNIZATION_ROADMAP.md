@@ -22,7 +22,7 @@ Guiding principles:
 - Documentation: architecture, save compatibility, roadmap, visual direction.
 - **No gameplay, balance, progression, or save-format changes.**
 
-## M1 — Visual design system & non-destructive shell 🚧 (implemented on `feature/m1-...`, pending review)
+## M1 — Visual design system & non-destructive shell ✅ (merged into `dev`)
 
 - ✅ Introduced the design tokens from [VISUAL_DIRECTION.md](VISUAL_DIRECTION.md)
   (`styles/modern/tokens.css`) — layered over Bootstrap, scoped to
@@ -39,11 +39,27 @@ Guiding principles:
 - Deferred to M2: the true responsive resource dashboard (M1 only lightly
   restyles the resource rows).
 
-## M2 — Modern responsive resource dashboard
+## M2 — Modern responsive resource dashboard 🚧 (implemented on `feature/m2-...`, pending review)
 
-- Reimplement the resource list as responsive resource cards driven by the
-  **existing** `Game.resources` data — read-only view replacement.
-- Keep the legacy view available as a fallback until parity is proven.
+- ✅ Replaced the fixed-380px, four-column resource table with a responsive
+  **resource-card dashboard** (`ui/modern/resourceDashboard.js`,
+  `styles/modern/resources.css`) — icon, state badge, current/capacity with a
+  storage meter, signed per-second rate and time-to-full/empty, grouped by
+  category, with a comfortable/compact density control.
+- ✅ The dashboard is a **projection of the legacy list**: identity, grouping,
+  lock state, selection, values and formatting are all read from the legacy rows
+  and the game's own accessors/delegates, and a card click dispatches a real
+  click on its `<tr>`. Parity is structural, not hand-maintained.
+- ✅ **Read-only view replacement** — no gameplay, balance, progression, economy
+  or save-schema change; `localStorage["save"]` is never touched.
+- ✅ Legacy view kept as a fallback: `?resources=legacy` (modern shell, legacy
+  table) and `?ui=legacy` (original presentation). The legacy column is hidden
+  only while the dashboard is genuinely in the DOM, so a failed build falls back
+  on its own.
+- ✅ Reclaims the width the 380px float consumed — the detail panel now fills the
+  workspace, closing M1's "desktop horizontal whitespace" limitation.
+- Evidence: [M2_RESOURCE_DASHBOARD.md](M2_RESOURCE_DASHBOARD.md).
+- Deferred to M5: live-region announcements for storage-full / energy-deficit.
 
 ## M3 — Research & progression visualization
 

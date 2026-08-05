@@ -5,7 +5,11 @@ of element IDs, classes and ancestry. M1 restyles the interface **without
 changing this contract**: the modern command-center shell is a CSS layer (plus a
 tiny presentation-only `ui/modern/shell.js`) scoped to `html[data-ui="modern"]`.
 
-This document records what must not change so future milestones (M2+) can
+M2 replaces the **presentation** of the resource list with a card dashboard,
+still without changing this contract — the legacy rows remain in the document,
+data-bound and authoritative (see "M2 resource dashboard" below).
+
+This document records what must not change so future milestones (M3+) can
 restructure safely.
 
 ## Golden rules
@@ -70,24 +74,55 @@ The `.navbar`, `#tabList.nav-tabs`, `#tabContent`, `.btn*`, `.table*`, `.panel`,
 `.progress*`, `.ui-pnotify*`, `#resourceNavParent` rows, and the loading screen
 are restyled purely via CSS.
 
-## Elements safe to WRAP later (not done in M1)
+## M2 resource dashboard — how the list was replaced
 
-The header brand cluster, the resource column container
-(`#resources > .container.col-xs-1`), and individual resource rows can be wrapped
-in new layout containers **in M2** provided the inner IDs/handlers survive.
+M2 did **not** rewrite `#resourceNavParent`. The legacy table stays in the DOM,
+keeps every ID, class, handler and data binding, and remains the authority for
+lock state, selection and values. What changed is only what the player sees:
 
-## Elements safe to REPLACE later (M2+)
+- `ui/modern/resourceDashboard.js` inserts `#scResourceDashboard` as the first
+  child of the `#resources` pane and renders one card per `<res>Nav` row.
+- `styles/modern/resources.css` hides the legacy column with
+  `html[data-ui="modern"][data-resources="cards"] #scResourceDashboard ~ .container.col-xs-1 { display:none }`.
+  The **sibling combinator is load-bearing**: the legacy list is only hidden
+  while the dashboard actually exists, so a failed build degrades to the table.
 
-- The resource list/rows (`#resourceNavParent` and children) → responsive
-  resource cards in **M2**.
+Rules for anyone touching this area:
+
+1. **Never invert the direction of truth.** The dashboard reads `.hidden` and
+   `info` off the row; it must never write them. Unlocking stays the job of
+   `refreshResources()`; selection stays the job of `activeResourceTab()`.
+2. **Activate by delegation.** A card must dispatch a real `click()` on its
+   `<tr>` so the inline handler *and* Bootstrap's `data-toggle="tab"` data-api
+   both run. Do not reimplement either.
+3. **Keep the row shape the projection reads**: `id="<res>Nav"`, an `<img>`, four
+   `<td>`s (icon, name, `#<res>ps`, `#<res>`), the `onclick`/`data-toggle`
+   attributes, and the `collapse*` header rows that seed the card groups.
+   `test/m2ResourceView.test.mjs` fails if any of these regress.
+4. **Do not reuse `.hidden` for modern state.** The dashboard mirrors it into its
+   own `sc-is-locked`; groups collapse via `sc-is-empty`.
+5. `#resourceTabParent` and its `.tab-pane` children may be restyled (width,
+   float, margin) but their `display` logic is Bootstrap's — leave it alone.
+
+## Elements safe to WRAP later (not done in M1/M2)
+
+The header brand cluster can be wrapped in new layout containers provided the
+inner IDs/handlers survive.
+
+## Elements safe to REPLACE later (M3+)
+
 - Research / solar-system / interstellar views → **M3/M4**.
+- The resource **detail panel** internals (`#resourceTabParent` panes: gain
+  buttons, machine tables, storage upgrades) — M2 only widened them.
 
 ## Known responsive hazards (legacy)
 
-- `#resources > .container.col-xs-1` has a **fixed `width:380px`** inline — on
-  narrow screens M1 constrains it (`width:100%`) so it never forces page
-  overflow. A true fluid rebuild is M2.
-- Resource rows use fixed `height:60px` inline styles and 4-column tables.
+- `#resources > .container.col-xs-1` has a **fixed `width:380px`** inline. M1
+  constrained it (`width:100%`) so it never forced page overflow; **M2 removes
+  it from view entirely** in cards mode and gives the detail panel the reclaimed
+  width. It still applies in either legacy fallback.
+- Resource rows use fixed `height:60px` inline styles and 4-column tables — only
+  visible now in `?ui=legacy` / `?resources=legacy`.
 - The header is a `.navbar` with multiple `.navbar-brand` anchors and inline
   `height:50px`; M1 flexes it and lets it wrap on mobile.
 - Several inline `style="..."` attributes exist; overriding them requires either

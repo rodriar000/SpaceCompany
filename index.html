@@ -8,6 +8,9 @@
 	     ?ui=legacy => legacy presentation; default => modern command center.
 	     This reads only the URL; it never touches the save. -->
 	<script>document.documentElement.setAttribute('data-ui', /[?&]ui=legacy(?:&|$)/i.test(location.search) ? 'legacy' : 'modern');</script>
+	<!-- M2 resource view: card dashboard by default. ?resources=legacy (or the
+	     global ?ui=legacy) restores the original resource table. URL only. -->
+	<script>document.documentElement.setAttribute('data-resources', /[?&](?:ui|resources)=legacy(?:&|$)/i.test(location.search) ? 'legacy' : 'cards');</script>
 	<link href="SpaceCompanyFavicon.png" rel="shortcut icon" type="image/x-icon" />
 	<link href="lib/bootstrap.min.css" rel="stylesheet" type="text/css" id="theme_css"/>
 	<link href="lib/pnotify.custom.min.css" rel="stylesheet" type="text/css">
@@ -21,6 +24,8 @@
 	<link href="styles/modern/shell.css" rel="stylesheet">
 	<link href="styles/modern/components.css" rel="stylesheet">
 	<link href="styles/modern/responsive.css" rel="stylesheet">
+	<!-- M2 responsive resource operations dashboard. -->
+	<link href="styles/modern/resources.css" rel="stylesheet">
 	<script type="text/javascript" src="ui/modern/shell.js"></script>
 
 
@@ -7213,6 +7218,10 @@
 <script type="text/javascript" src="ui/resourceUI.js"></script>
 <script type="text/javascript" src="ui/techUI.js"></script>
 <script type="text/javascript" src="ui/legacyUI.js"></script>
+<!-- M2: responsive resource dashboard. Loads after ui/resourceUI.js so it can
+     borrow the legacy number-formatting delegates; registers itself in
+     Game.uiComponents. Presentation only — read-only over game state. -->
+<script type="text/javascript" src="ui/modern/resourceDashboard.js"></script>
 
 <script type="text/javascript" src="core.js"></script>
 <script type="text/javascript" src="notification.js"></script>
