@@ -1,0 +1,458 @@
+/* ============================================================================
+ * Space Company — Modern Design System : RESOURCE OPERATIONS DASHBOARD (M2)
+ *
+ * The responsive resource-card system from docs/VISUAL_DIRECTION.md ("Resource
+ * cards"), replacing the legacy fixed-380px, 4-column resource TABLE.
+ *
+ * Scoping / safety
+ * ----------------
+ *  - Everything is scoped to html[data-ui="modern"][data-resources="cards"];
+ *    `?ui=legacy` and `?resources=legacy` fall back to the legacy table.
+ *  - The legacy column is hidden ONLY when the dashboard is actually in the DOM
+ *    (`#scResourceDashboard ~ ...`). If the dashboard script fails to build, the
+ *    legacy list stays visible — the fallback is structural, not a promise.
+ *  - No rule here references `.hidden`; the legacy visibility contract
+ *    (docs/UI_DOM_CONTRACT.md) is untouched, as is `.tab-pane` display logic.
+ * ==========================================================================*/
+
+/* ========================================================================== *
+ * 1. VIEW SWAP — legacy column out, dashboard in
+ * ========================================================================== */
+
+/* The legacy list stays in the document (data-bound, clickable, authoritative);
+   it is only removed from view while the dashboard is present. */
+html[data-ui="modern"][data-resources="cards"]
+  #scResourceDashboard ~ .container.col-xs-1 {
+  display: none;
+}
+
+/* Reclaim the width the 380px float used to take: the detail panel is now a
+   full-width workspace beneath the dashboard (this also resolves the M1
+   "empty right-hand side" limitation). */
+html[data-ui="modern"][data-resources="cards"]
+  #scResourceDashboard ~ #resourceTabParent {
+  width: 100% !important;
+  float: none !important;
+}
+html[data-ui="modern"][data-resources="cards"]
+  #scResourceDashboard ~ #resourceTabParent > .tab-pane {
+  width: 100% !important;
+  float: none !important;
+  margin-left: 0 !important;
+}
+html[data-ui="modern"][data-resources="cards"]
+  #scResourceDashboard ~ #resourceTabParent .container {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-left: 0;
+  padding-right: 0;
+}
+/* Genuinely wide legacy detail tables scroll inside their own region. */
+html[data-ui="modern"][data-resources="cards"]
+  #scResourceDashboard ~ #resourceTabParent .table {
+  max-width: 100%;
+}
+
+/* ========================================================================== *
+ * 2. DASHBOARD SHELL
+ * ========================================================================== */
+
+html[data-ui="modern"] .sc-res-dash {
+  display: block;
+  margin: 0 0 var(--sc-sp-5);
+}
+
+/* ---- Toolbar: identity, telemetry, density control ------------------------ */
+html[data-ui="modern"] .sc-res-toolbar {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sc-sp-2) var(--sc-sp-3);
+  padding-bottom: var(--sc-sp-2);
+  margin-bottom: var(--sc-sp-4);
+  border-bottom: var(--sc-bw-1) solid var(--sc-divider);
+}
+/* The ID prefix outranks shell.css's `#tabContent h2/h3` heading rhythm, which
+   would otherwise add its own underline and margins to these headings. */
+html[data-ui="modern"] #scResourceDashboard .sc-res-toolbar__title {
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-md);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-strong);
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+html[data-ui="modern"] .sc-res-toolbar__count {
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-fs-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+html[data-ui="modern"] .sc-res-density {
+  margin-left: auto;
+  min-height: 32px;
+  padding: var(--sc-sp-1) var(--sc-sp-3);
+  font-family: var(--sc-font-ui);
+  font-size: var(--sc-fs-xs);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-secondary);
+  background: var(--sc-surface-2);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-1);
+  cursor: pointer;
+  transition: color var(--sc-dur-1) var(--sc-ease),
+              border-color var(--sc-dur-1) var(--sc-ease),
+              background-color var(--sc-dur-1) var(--sc-ease);
+}
+html[data-ui="modern"] .sc-res-density:hover {
+  color: var(--sc-cyan-bright);
+  border-color: var(--sc-border-strong);
+  background: var(--sc-surface-3);
+}
+html[data-ui="modern"] .sc-res-density:focus-visible {
+  outline: none;
+  box-shadow: var(--sc-focus-ring);
+}
+
+/* ---- Empty-selection hint ------------------------------------------------- */
+html[data-ui="modern"] .sc-res-hint {
+  margin: calc(-1 * var(--sc-sp-2)) 0 var(--sc-sp-4);
+  font-size: var(--sc-fs-sm);
+  color: var(--sc-text-muted);
+}
+html[data-ui="modern"] .sc-res-dash.sc-has-selection .sc-res-hint { display: none; }
+
+/* ---- Category groups ------------------------------------------------------ */
+html[data-ui="modern"] .sc-res-group { margin-bottom: var(--sc-sp-5); }
+html[data-ui="modern"] .sc-res-group:last-child { margin-bottom: 0; }
+html[data-ui="modern"] .sc-res-group.sc-is-empty { display: none; }
+
+html[data-ui="modern"] #scResourceDashboard .sc-res-group__title {
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-xs);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+  margin: 0 0 var(--sc-sp-3);
+  padding: 0;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sc-sp-3);
+}
+/* A hairline rule trailing the label — engineered, not decorative. */
+html[data-ui="modern"] #scResourceDashboard .sc-res-group__title::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(90deg, var(--sc-divider), transparent);
+}
+
+/* ---- The grid ------------------------------------------------------------- */
+html[data-ui="modern"] .sc-res-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+  gap: var(--sc-sp-3);
+  align-items: stretch;
+}
+
+/* ========================================================================== *
+ * 3. RESOURCE CARD
+ * ========================================================================== */
+
+html[data-ui="modern"] .sc-res-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sc-sp-2);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sc-sp-3);
+  text-align: left;
+  font-family: var(--sc-font-ui);
+  color: var(--sc-text);
+  background: linear-gradient(180deg, var(--sc-surface-2), var(--sc-surface-1));
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-2);
+  box-shadow: var(--sc-elev-1);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color var(--sc-dur-1) var(--sc-ease),
+              box-shadow var(--sc-dur-1) var(--sc-ease),
+              transform var(--sc-dur-1) var(--sc-ease-out);
+}
+
+/* Locked resources are absent from the view, exactly as their legacy rows are.
+   This mirrors the row's `.hidden` state — it never overrides it. */
+html[data-ui="modern"] .sc-res-card.sc-is-locked { display: none; }
+
+/* State strip down the leading edge: a second, non-colour carrier of state. */
+html[data-ui="modern"] .sc-res-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--sc-border-strong);
+}
+html[data-ui="modern"] .sc-res-card.sc-state-producing::before { background: var(--sc-positive); }
+html[data-ui="modern"] .sc-res-card.sc-state-draining::before  { background: var(--sc-negative); }
+html[data-ui="modern"] .sc-res-card.sc-state-full::before      { background: var(--sc-warning); }
+html[data-ui="modern"] .sc-res-card.sc-state-idle::before      { background: var(--sc-border-strong); }
+
+html[data-ui="modern"] .sc-res-card:hover {
+  border-color: var(--sc-border-strong);
+  box-shadow: var(--sc-elev-2);
+  transform: translateY(-1px);
+}
+html[data-ui="modern"] .sc-res-card:focus-visible {
+  outline: none;
+  box-shadow: var(--sc-focus-ring);
+}
+html[data-ui="modern"] .sc-res-card.sc-is-selected {
+  border-color: var(--sc-cyan-dim);
+  background: linear-gradient(180deg, var(--sc-surface-3), var(--sc-surface-2));
+  box-shadow: var(--sc-glow-cyan);
+}
+html[data-ui="modern"] .sc-res-card.sc-is-selected::before {
+  width: 3px;
+  background: var(--sc-cyan);
+}
+
+/* ---- Head: icon, name, state badge ---------------------------------------- */
+html[data-ui="modern"] .sc-res-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-sp-2);
+  min-width: 0;
+}
+html[data-ui="modern"] .sc-res-card__icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6));
+}
+html[data-ui="modern"] .sc-res-card__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--sc-fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sc-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Glyph + word: status is never carried by colour alone. */
+html[data-ui="modern"] .sc-res-card__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+html[data-ui="modern"] .sc-res-card__state-glyph { font-size: 8px; line-height: 1; }
+html[data-ui="modern"] .sc-state-producing .sc-res-card__state { color: var(--sc-positive); }
+html[data-ui="modern"] .sc-state-draining  .sc-res-card__state { color: var(--sc-negative); }
+html[data-ui="modern"] .sc-state-full      .sc-res-card__state { color: var(--sc-warning); }
+
+/* ---- Value: current / capacity, tabular so digits never jitter ------------ */
+html[data-ui="modern"] .sc-res-card__value {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: var(--sc-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  line-height: var(--sc-lh-tight);
+  min-width: 0;
+}
+html[data-ui="modern"] .sc-res-card__current {
+  font-size: var(--sc-fs-lg);
+  font-weight: 600;
+  color: var(--sc-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html[data-ui="modern"] .sc-state-full .sc-res-card__current { color: var(--sc-warning); }
+html[data-ui="modern"] .sc-res-card__capacity-wrap {
+  font-size: var(--sc-fs-sm);
+  color: var(--sc-text-muted);
+  white-space: nowrap;
+}
+
+/* ---- Storage meter -------------------------------------------------------- */
+html[data-ui="modern"] .sc-res-card__meter {
+  display: block;
+  position: relative;
+  height: 4px;
+  border-radius: var(--sc-r-pill);
+  background: rgba(4, 6, 12, 0.65);
+  border: var(--sc-bw-1) solid var(--sc-divider);
+  overflow: hidden;
+}
+html[data-ui="modern"] .sc-res-card__meter.is-hidden { display: none; }
+html[data-ui="modern"] .sc-res-card__fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--sc-cyan-dim), var(--sc-cyan));
+  transition: width var(--sc-dur-2) var(--sc-ease);
+}
+html[data-ui="modern"] .sc-state-full .sc-res-card__fill {
+  background: linear-gradient(90deg, var(--sc-amber-dim), var(--sc-amber));
+}
+html[data-ui="modern"] .sc-state-draining .sc-res-card__fill {
+  background: linear-gradient(90deg, var(--sc-negative), #ff8a94);
+}
+
+/* ---- Foot: rate + ETA ----------------------------------------------------- */
+html[data-ui="modern"] .sc-res-card__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sc-sp-2);
+  min-width: 0;
+}
+html[data-ui="modern"] .sc-res-card__rate {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  font-family: var(--sc-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  font-size: var(--sc-fs-sm);
+  font-weight: 600;
+  color: var(--sc-text-secondary);
+  white-space: nowrap;
+}
+html[data-ui="modern"] .sc-res-card__rate.is-positive { color: var(--sc-positive); }
+html[data-ui="modern"] .sc-res-card__rate.is-negative { color: var(--sc-negative); }
+html[data-ui="modern"] .sc-res-card__rate.is-idle     { color: var(--sc-text-muted); }
+html[data-ui="modern"] .sc-res-card__rate-unit {
+  font-size: var(--sc-fs-xs);
+  font-weight: 400;
+  opacity: 0.75;
+}
+html[data-ui="modern"] .sc-res-card__eta {
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-fs-xs);
+  color: var(--sc-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========================================================================== *
+ * 4. COMPACT DENSITY — the dense row form for veteran, many-resource play
+ * ========================================================================== */
+
+/* The dense form keeps every signal of the comfortable card — identity, state
+   badge, value/capacity, meter and rate — and only drops the ETA line. */
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-grid {
+  grid-template-columns: repeat(auto-fill, minmax(276px, 1fr));
+  gap: var(--sc-sp-2);
+}
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "head  value"
+    "meter rate";
+  align-items: center;
+  gap: 3px var(--sc-sp-3);
+  padding: var(--sc-sp-2) var(--sc-sp-3);
+}
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__head { grid-area: head; }
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__icon {
+  width: 20px;
+  height: 20px;
+}
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__value {
+  grid-area: value;
+  justify-self: end;
+}
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__current {
+  font-size: var(--sc-fs-base);
+}
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__meter { grid-area: meter; }
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__foot {
+  grid-area: rate;
+  justify-self: end;
+}
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__eta { display: none; }
+
+/* ========================================================================== *
+ * 5. RESPONSIVE — cards on wide screens, dense rows on phones
+ * ========================================================================== */
+
+@media (max-width: 1024px) {
+  html[data-ui="modern"] .sc-res-grid { grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  html[data-ui="modern"] .sc-res-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--sc-sp-2);
+  }
+  html[data-ui="modern"] .sc-res-card__eta { display: none; }
+}
+
+/* Phones: every card collapses to a dense, full-width row — one glance per
+   resource, touch target well above 44px, and no horizontal scrolling. */
+@media (max-width: 560px) {
+  html[data-ui="modern"] .sc-res-grid { grid-template-columns: 1fr; gap: var(--sc-sp-2); }
+  html[data-ui="modern"] .sc-res-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "head  value"
+      "meter rate";
+    align-items: center;
+    gap: 3px var(--sc-sp-3);
+    min-height: 56px;
+    padding: var(--sc-sp-2) var(--sc-sp-3);
+  }
+  html[data-ui="modern"] .sc-res-card__head { grid-area: head; }
+  html[data-ui="modern"] .sc-res-card__icon { width: 22px; height: 22px; }
+  html[data-ui="modern"] .sc-res-card__name { font-size: var(--sc-fs-xs); }
+  html[data-ui="modern"] .sc-res-card__value { grid-area: value; justify-self: end; }
+  html[data-ui="modern"] .sc-res-card__current { font-size: var(--sc-fs-md); }
+  html[data-ui="modern"] .sc-res-card__meter { grid-area: meter; }
+  html[data-ui="modern"] .sc-res-card__foot { grid-area: rate; justify-self: end; }
+  html[data-ui="modern"] .sc-res-card__eta { display: none; }
+
+  html[data-ui="modern"] .sc-res-toolbar { margin-bottom: var(--sc-sp-3); row-gap: var(--sc-sp-1); }
+  html[data-ui="modern"] #scResourceDashboard .sc-res-toolbar__title { font-size: var(--sc-fs-sm); }
+  html[data-ui="modern"] .sc-res-density { min-height: 36px; }
+  html[data-ui="modern"] .sc-res-group { margin-bottom: var(--sc-sp-4); }
+}
+
+@media (max-width: 360px) {
+  html[data-ui="modern"] .sc-res-card { gap: 2px var(--sc-sp-2); padding: var(--sc-sp-2); }
+  html[data-ui="modern"] .sc-res-card__current { font-size: var(--sc-fs-base); }
+  html[data-ui="modern"] .sc-res-card__capacity-wrap { font-size: var(--sc-fs-xs); }
+}
+
+/* ========================================================================== *
+ * 6. MOTION — clarifies, never entertains
+ * ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui="modern"] .sc-res-card,
+  html[data-ui="modern"] .sc-res-card__fill,
+  html[data-ui="modern"] .sc-res-density {
+    transition: none;
+  }
+  html[data-ui="modern"] .sc-res-card:hover { transform: none; }
+}
