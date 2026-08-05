@@ -115,7 +115,19 @@ function createSandbox({ search = '', withFixture = true, storage } = {}) {
     Game: {
       uiComponents: [],
       settings: { format: (v) => String(Math.round(Number(v))) },
-      utils: { getFullTimeDisplay: (s) => 'T' + Math.round(s) },
+      utils: {
+        getFullTimeDisplay: (s) => 'T' + Math.round(s),
+        // Same decomposition contract as utils.js: [y, d, h, m, s, ms],
+        // years extracted first (which is why getFullTimeDisplay loses them).
+        splitDateTime: (seconds) => {
+          let ms = Math.floor(seconds * 1000);
+          const y = Math.floor(ms / (365 * 24 * 3600 * 1000)); ms %= 365 * 24 * 3600 * 1000;
+          const d = Math.floor(ms / (24 * 3600 * 1000)); ms %= 24 * 3600 * 1000;
+          const h = Math.floor(ms / (3600 * 1000)); ms %= 3600 * 1000;
+          const m = Math.floor(ms / 60000); ms %= 60000;
+          return [y, d, h, m, Math.floor(ms / 1000), ms];
+        },
+      },
       resourceData: { metal: { desc: 'Metal is useful.' } },
       resourcesUI: {
         // Distinctive outputs prove the legacy delegates are what render numbers.
@@ -220,14 +232,78 @@ test('uncapped storage shows infinity and hides the meter', () => {
 
 test('storage fill and ETA are derived from live values', () => {
   const env = createSandbox();
-  boot(env);
+  const component = boot(env);
   const metal = cardFor(env, 'metal');
   // 842 / 1000 -> 84.2%
   assert.equal(metal.byClass('sc-res-card__fill')[0].style.width, '84.2%');
   assert.equal(metal.byClass('sc-res-card__meter')[0].getAttribute('aria-valuenow'), '84');
-  // (1000 - 842) / 260 s, formatted by the game's own clock helper.
-  assert.equal(textOf(metal, 'sc-res-card__eta'), 'full in T1');
+  // Metal's own gap here is (1000 - 842) / 260 = 0.6s, i.e. below the
+  // one-second floor, so no ETA is offered.
+  assert.equal(textOf(metal, 'sc-res-card__eta'), '');
+  // Drain side: 61234 / 2940 = 20.8s, via the game's own clock helper.
   assert.equal(textOf(cardFor(env, 'energy'), 'sc-res-card__eta'), 'empty in T21');
+
+  // Widen the cap and the fill and the ETA both follow the live values.
+  env.state.metalStorage = 842 + 260 * 300;
+  component.update(0.1);
+  assert.equal(textOf(metal, 'sc-res-card__eta'), 'full in T300');
+  // 842 / 78842 -> 1.1%
+  assert.equal(metal.byClass('sc-res-card__fill')[0].style.width, '1.1%');
+  assert.equal(metal.byClass('sc-res-card__meter')[0].getAttribute('aria-valuenow'), '1');
+});
+
+test('long ETAs are compacted so a card can never truncate them', () => {
+  const env = createSandbox();
+  const component = boot(env);
+  const eta = () => textOf(cardFor(env, 'metal'), 'sc-res-card__eta');
+  const DAY = 24 * 3600;
+
+  // Under a day: identical to the detail panel's clock (getFullTimeDisplay).
+  env.state.metalStorage = 842 + 260 * 3600;
+  component.update(0.1);
+  assert.equal(eta(), 'full in T3600');
+
+  // Past a day: the meaningless HH:MM:SS tail is dropped. The long form
+  // ("93 Days 16:53:07") is what overflowed the card at late-game scale.
+  env.state.metalStorage = 842 + 260 * (93 * DAY + 16 * 3600);
+  component.update(0.1);
+  assert.equal(eta(), 'full in 93d 16h');
+
+  // Past a year: getFullTimeDisplay would print "30 Days …" because it reads
+  // only splitDateTime()[1] and drops the years. The card must stay truthful.
+  env.state.metalStorage = 842 + 260 * ((2 * 365 + 30) * DAY);
+  component.update(0.1);
+  assert.equal(eta(), 'full in 2y 30d');
+  assert.equal(env.sandbox.Game.utils.getFullTimeDisplay(0), 'T0',
+    'the legacy helper itself is left untouched');
+});
+
+test('sub-second ETAs are dropped rather than shown as 00:00:00', () => {
+  const env = createSandbox();
+  const component = boot(env);
+  // 260/s into a 0.1-unit gap -> well under a second.
+  env.state.metalStorage = 842.1;
+  component.update(0.1);
+  assert.equal(textOf(cardFor(env, 'metal'), 'sc-res-card__eta'), '');
+
+  // One second is the threshold, and it still renders.
+  env.state.metalStorage = 842 + 260;
+  component.update(0.1);
+  assert.equal(textOf(cardFor(env, 'metal'), 'sc-res-card__eta'), 'full in T1');
+});
+
+test('no ETA string is wide enough to clip a card', () => {
+  const env = createSandbox();
+  const component = boot(env);
+  const DAY = 24 * 3600;
+  // Sweep magnitudes from seconds to millennia.
+  for (const seconds of [1, 59, 3599, 86399, 3 * DAY, 93 * DAY, 364 * DAY,
+    2 * 365 * DAY, 999 * 365 * DAY]) {
+    env.state.metalStorage = 842 + 260 * seconds;
+    component.update(0.1);
+    const text = textOf(cardFor(env, 'metal'), 'sc-res-card__eta');
+    assert.ok(text.length <= 20, `ETA "${text}" (${text.length} chars) must stay compact`);
+  }
 });
 
 test('state is classified and labelled, never carried by colour alone', () => {

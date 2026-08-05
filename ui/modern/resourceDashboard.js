@@ -136,13 +136,37 @@
     return fallback;
   }
 
-  /** "full in 01:23:45" / "empty in 00:04:10" — reuses the game's own clock. */
+  /**
+   * "full in 01:23:45" / "empty in 93d 16h" — the card's ETA, on the game's own
+   * clock.
+   *
+   * Under a day we defer to `getFullTimeDisplay` so a card reads exactly like
+   * the detail panel's "time remaining" line. Past a day we compact from the
+   * same `splitDateTime` decomposition, for two reasons:
+   *   1. `93 Days 16:53:07` overflows the card's secondary line at late-game
+   *      magnitudes, and a truncated ETA is worse than a coarse one;
+   *   2. `getFullTimeDisplay` prints only `splitDateTime()[1]`, so it silently
+   *      drops the years component — "2 years 30 days" renders as "30 Days".
+   *      Reading the decomposition ourselves keeps long ETAs truthful.
+   */
   function formatDuration(seconds) {
     var utils = window.Game && window.Game.utils;
-    if (utils && typeof utils.getFullTimeDisplay === 'function') {
+    if (!utils || typeof utils.splitDateTime !== 'function') {
+      return Math.round(seconds) + 's';
+    }
+
+    var parts = utils.splitDateTime(seconds); // [y, d, h, m, s, ms]
+    var years = parts[0];
+    var days = parts[1];
+    var hours = parts[2];
+
+    if (years > 0) return years + 'y ' + days + 'd';
+    if (days > 0) return days + 'd ' + hours + 'h';
+
+    if (typeof utils.getFullTimeDisplay === 'function') {
       return String(utils.getFullTimeDisplay(seconds));
     }
-    return Math.round(seconds) + 's';
+    return hours + 'h ' + parts[3] + 'm';
   }
 
   /* ========================================================================= *
@@ -494,12 +518,16 @@
     setText(card.nodes.rateGlyph, perSecond > 0 ? '+' : (perSecond < 0 ? '−' : '·'));
     setClass(card.nodes.rate, 'sc-res-card__rate is-' + sign);
 
-    /* Time-to-full / time-to-empty. */
+    /* Time-to-full / time-to-empty. Durations under a second are dropped: the
+       legacy clock renders them "00:00:00", which reads as broken rather than
+       as "imminent", and an ETA that short tells the player nothing. */
     var eta = '';
     if (perSecond > 0 && capped && capacity > current) {
-      eta = 'full in ' + formatDuration((capacity - current) / perSecond);
+      var toFull = (capacity - current) / perSecond;
+      if (toFull >= 1) eta = 'full in ' + formatDuration(toFull);
     } else if (perSecond < 0 && current > 0) {
-      eta = 'empty in ' + formatDuration(current / Math.abs(perSecond));
+      var toEmpty = current / Math.abs(perSecond);
+      if (toEmpty >= 1) eta = 'empty in ' + formatDuration(toEmpty);
     }
     setText(card.nodes.eta, eta);
 

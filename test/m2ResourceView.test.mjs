@@ -128,6 +128,40 @@ test('cards degrade to a dense single-column row on phones', () => {
     'touch targets stay comfortably above 44px');
 });
 
+/* --- Deployed-review corrections ------------------------------------------- */
+
+test('compact density hides the state WORD without removing it from the a11y tree', () => {
+  // Late-game values squeezed names to "URAN…"/"LUNA…" in the dense form. The
+  // fix drops the state word visually so the identity survives — but it must
+  // stay screen-reader readable, so display:none is not an acceptable fix.
+  const rule = /\[data-density="compact"\][^{]*\.sc-res-card__state-label\s*\{([^}]*)\}/.exec(css);
+  assert.ok(rule, 'compact density must treat the state label specially');
+  assert.doesNotMatch(rule[1], /display\s*:\s*none/i,
+    'the state label must not be display:none — that would drop it for screen readers');
+  assert.match(rule[1], /clip(-path)?\s*:/i, 'it must be visually clipped (sr-only) instead');
+  assert.match(rule[1], /position\s*:\s*absolute/i);
+});
+
+test('the state glyph survives in compact density (state is never colour-alone)', () => {
+  const hidden = /\[data-density="compact"\][^{]*\.sc-res-card__state-glyph\s*\{([^}]*)\}/.exec(css);
+  if (hidden) {
+    assert.doesNotMatch(hidden[1], /display\s*:\s*none/i,
+      'the glyph is the non-colour state carrier in the dense form');
+  }
+  // And the badge as a whole is not hidden either.
+  for (const r of css.split('}')) {
+    const sel = r.split('{')[0] || '';
+    if (!/\[data-density="compact"\]/.test(sel) || !/\.sc-res-card__state\s*$/.test(sel.trim())) continue;
+    assert.doesNotMatch(r, /display\s*:\s*none/i, 'the state badge must not vanish in compact density');
+  }
+});
+
+test('the resource name is allowed to take the remaining space in compact density', () => {
+  const rule = /\[data-density="compact"\][^{]*\.sc-res-card__name\s*\{([^}]*)\}/.exec(css);
+  assert.ok(rule, 'compact density must give the name flex priority');
+  assert.match(rule[1], /flex\s*:\s*1\s+1/, 'the name grows into the free space');
+});
+
 test('motion is reduced when the player asks for it', () => {
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/,
     'reduced-motion is honoured');

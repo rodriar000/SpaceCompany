@@ -378,6 +378,34 @@ html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__icon {
   width: 20px;
   height: 20px;
 }
+/* In the dense form the identity must outrank the state WORD: late-game values
+   ("1,000Qa / 1,000Qa") widen the value column and were squeezing names down to
+   "URAN…"/"LUNA…". The badge keeps its glyph — a distinct shape per state, so
+   state is still not carried by colour alone — and the word is moved to
+   screen-reader-only rather than removed, so the label is still announced. */
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__state-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__state-glyph {
+  font-size: 9px;
+}
+/* Never let the name be the first thing to give way. */
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__value {
+  flex: 0 0 auto;
+}
 html[data-ui="modern"] .sc-res-dash[data-density="compact"] .sc-res-card__value {
   grid-area: value;
   justify-self: end;
