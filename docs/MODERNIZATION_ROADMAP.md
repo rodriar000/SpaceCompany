@@ -94,10 +94,26 @@ Guiding principles:
 - Deferred to M4/M5: a zoom-out control for the map, live-region announcements,
   and edge-crossing minimisation if the data ever gains multi-parent nodes.
 
-## M4 — Interactive solar-system experience
+## M4 — Celestial operations & interstellar navigation 🚧 (implemented on `feature/m4-...`, pending review)
 
-- Replace the solar-system/interstellar UI with an interactive map over the
-  existing `interstellar`/`solarSystem`/`stargaze` state. No progression changes.
+- ✅ Replaced the solar-system navigation column with an **orbital command
+  center** (`ui/modern/celestialModel.js`, `ui/modern/celestialCommandCenter.js`,
+  `styles/modern/celestial.css`): deterministic orbital map, interstellar
+  network, destination inspector, frontier focus and a vertical mission route on
+  phones.
+- ✅ **Read-only projection.** 14 solar destinations, 13 routes and 79 star
+  systems derived from the legacy rows, `explored[]`, the published fuel-cost
+  spans and `Game.interstellar.*`. No cost, formula or unlock rule is copied.
+- ✅ **Canonical actions only.** Exploring clicks the legacy
+  `<button onclick="explore('X')">` or `#star_<id>_explore`; selecting clicks the
+  destination `<tr>`. Measured in Chrome: fuel 30 → 10 for a cost-20 Moon,
+  statistic +1, successor revealed, repeat dispatch inert.
+- ✅ Fixed the inherited **79 duplicate IDs** (`star_<id>_name` emitted by two
+  templates) → **0**, with zero consumers affected.
+- ✅ Added `?space=legacy`; `?ui=legacy`, `?resources=legacy` and
+  `?research=legacy` all still behave, in every combination, save byte-identical.
+- ✅ No gameplay, balance, progression, economy or save-schema change.
+- Evidence: [M4_CELESTIAL_OPERATIONS.md](M4_CELESTIAL_OPERATIONS.md).
 
 ## M5 — Accessibility, motion & audio polish
 

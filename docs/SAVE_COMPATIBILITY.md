@@ -22,6 +22,11 @@ object, and their loss only resets a display choice:
 | --- | --- | --- |
 | `sc.ui.resourceDensity` | `ui/modern/resourceDashboard.js` (M2) | `comfortable` \| `compact` — resource-card density. |
 
+M4 likewise adds **no key at all**: `ui/modern/celestialModel.js` and
+`ui/modern/celestialCommandCenter.js` never touch `localStorage`, and the
+selected destination is module state that dies with the page. `?space=legacy` is
+URL-only. Verified byte-identical across every fallback combination.
+
 M3 adds **no key at all**: `ui/modern/techGraph.js` and
 `ui/modern/techCommandCenter.js` never touch `localStorage` or `sessionStorage`,
 and the selected technology is module state that dies with the page. The

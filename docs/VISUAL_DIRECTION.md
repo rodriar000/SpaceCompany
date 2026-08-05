@@ -228,6 +228,23 @@ Evidence: [M2_RESOURCE_DASHBOARD.md](M2_RESOURCE_DASHBOARD.md).
   (see SAVE_COMPATIBILITY.md).
 
 
+## Celestial operations (M4)
+
+The fourth surface on the same tokens. Rules specific to the orbital map:
+
+- **Schematic, never astronomical.** Rings encode progression stage, not orbital
+  radius, and the header says so. The map must never imply real scale or distance.
+- **The star is the only glowing object.** Everything else earns emphasis through
+  border and state, so the frontier reads without neon.
+- **Every state has a word and a glyph** — Ready ▶, Insufficient fuel ✕,
+  Explored ✓, Conquered ✦, Survey only ◎, Unsurveyed ◇ — legible in greyscale.
+- **Fog conceals content, not position.** An unreached destination keeps its slot
+  and outline but shows no name, cost or faction.
+- **Phones get a mission route**, not a shrunken orbit: stage-grouped vertical
+  cards with a spine and ≥ 56 px targets.
+
+See [M4_CELESTIAL_OPERATIONS.md](M4_CELESTIAL_OPERATIONS.md).
+
 ## Technology map (M3)
 
 The research view is the third surface built on these tokens, after the shell

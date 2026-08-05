@@ -12,6 +12,9 @@ data-bound and authoritative (see "M2 resource dashboard" below).
 M3 replaces the **presentation** of the research technology list the same way,
 leaving `#techTable` and its rows in the DOM (see "M3 research command center").
 
+M4 does the same for the solar-system navigation column, leaving every
+destination `<tr>` and explore row in the DOM (see "M4 celestial operations").
+
 This document records what must not change so future milestones (M4+) can
 restructure safely.
 
@@ -187,3 +190,46 @@ Rules for anyone touching this area:
   of `.hidden`).
 - Wide legacy tables must scroll inside their own container
   (`overflow-x:auto`), never the page body.
+
+
+## M4 celestial operations — how the solar-system column was replaced
+
+M4 did **not** rewrite the solar-system navigation. Every `<tr id="<bodyId>">`
+(`moon`, `mercury`, `venus`, `mars`, `asteroidBelt`, `wonderStation`, `jupiter`,
+`saturn`, `uranus`, `neptune`, `pluto`, `kuiperBelt`, `solCenter`,
+`spaceRocket`), every `<tr id="explore<Body>">` with its
+`<button onclick="explore('…')">`, every `#<bodyId>RocketFuelCost` span and every
+`star_<id>*` element stays in the document. This is required, not courteous:
+`launchRocket()` and `explore()` set `.className` on a dozen ids through
+**unguarded** `getElementById(...)` calls.
+
+- `ui/modern/celestialCommandCenter.js` inserts `#scCelestialCenter` as the first
+  child of the `#solarSystem` pane and renders one `<article>` per destination
+  over the projection from `ui/modern/celestialModel.js`.
+- `styles/modern/celestial.css` hides the legacy 250px nav column with
+  `html[data-ui="modern"][data-space="map"] #scCelestialCenter ~ .container[style*="250px"] { display:none }`.
+  The **sibling combinator is load-bearing**, exactly as in M2/M3.
+
+Rules for anyone touching this area:
+
+1. **Never invert the direction of truth.** The map reads `.hidden` / `info` off
+   the rows and `explored`/`entries` off the game; it must never write them.
+2. **Act by delegation.** A destination's action dispatches a real `click()` on
+   the legacy `<button onclick="explore('X')">` or on `#star_<id>_explore` —
+   never the underlying function as well, never twice.
+3. **Select by delegation.** Selection clicks the `<tr>` so `activeSolarTab(...)`
+   *and* Bootstrap's tab data-api both run.
+4. **Keep the shapes the projection reads**: the row ids, `explore<Body>` rows
+   with a `<button>` child, the static `#<bodyId>RocketFuelCost` spans, and
+   `star_<id>` / `star_<id>_explore` / `star_<id>Cost`.
+5. **Do not reuse `.hidden` for modern state.** The map uses `sc-is-concealed`,
+   `sc-state-*` and `sc-is-collapsed`. `celestial.css` contains no `.hidden`
+   selector at all — asserted by `test/celestialOperations.test.mjs`.
+6. **Star heading ids**: `starTemplate` owns `{{htmlId}}_name`;
+   `factionStarTemplate` owns `{{htmlId}}_conquer_name`. They must stay distinct
+   — sharing them is what produced 79 duplicate IDs before M4.
+
+New selectors owned by M4: `html[data-space="map"|"legacy"]`,
+`#scCelestialCenter[data-layout="map"|"route"]`, `#scCelCanvas`,
+`#scCelStarList`, `#scCel-solar-<id>` / `#scCel-star-<id>`,
+`[data-select]`, `[data-act]`, `[data-open]`, `#scCelFocus`, `#scCelInspector`.

@@ -30,6 +30,9 @@ Baseline: `da4881e465a3a713ff0ccf26efc7c30aad905a87`.
 | R15 | **Presentation taxonomy leaking into gameplay.** Visual lanes could drift into being treated as game categories. | Low | Med | Lanes are declared presentation-only, are never read by game code, are total (an unmapped technology falls back rather than disappearing), and are asserted never to be written at runtime. Documented in M3_TECHNOLOGY_GRAPH.md. |
 | R16 | **Per-tick cost of a complex view.** A graph rebuilt on the 100 ms UI tick would degrade the whole game. | Med | Med | The DOM is built exactly once and node geometry is state-independent, so updates are diffed text/class writes. A structure signature gates re-projection; the steady per-tick cost measures 0.0055 ms and element counts are unchanged after 20 tab round-trips. |
 
+| R17 | **A celestial view drifting from canonical progression.** Travel, exploration and unlock rules are spread across imperative DOM writes in `solarSystem.js`; a projection could easily encode a stale copy. | Med | **High** | Routes and costs are read at runtime from the legacy rows and published spans; `test/celestialOperations.test.mjs` re-reads `solarSystem.js` and fails if the registry drifts, including asserting every `planetsData` entry is modelled. Source-level tests forbid copied costs and the `distance * 10000` formula. |
+| R18 | **Inherited duplicate DOM IDs** (79, from two star templates sharing `{{htmlId}}_name`) make `getElementById` ambiguous and any future selector work unsafe. | High (present) | Med | Measured exactly, root-caused, and corrected with a deterministic rename of the consumer-free faction heading. Now 0 in modern and both legacy modes, asserted by test. No repository-wide ID cleanup was attempted. |
+
 ## Standing rules carried forward
 
 - Saves are sacred: no key/serialization/economy change without a tested forward migration (SAVE_COMPATIBILITY.md).
