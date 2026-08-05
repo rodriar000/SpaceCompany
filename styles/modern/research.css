@@ -1,0 +1,865 @@
+/* ============================================================================
+ * Space Company — Modern Design System : RESEARCH COMMAND CENTER (M3)
+ *
+ * The technology map that replaces the flat legacy research table, following
+ * docs/VISUAL_DIRECTION.md and documented in docs/M3_TECHNOLOGY_GRAPH.md.
+ *
+ * Scoping / safety
+ * ----------------
+ *  - Everything is scoped to html[data-ui="modern"][data-research="graph"];
+ *    `?ui=legacy` and `?research=legacy` fall back to the legacy `#techTable`.
+ *  - The legacy table is hidden ONLY while `#scTechCenter` is actually in the
+ *    DOM (sibling combinator). If the script fails to build, the legacy table
+ *    stays visible — the fallback is structural, not a promise.
+ *  - No rule here references `.hidden`; the legacy visibility contract
+ *    (docs/UI_DOM_CONTRACT.md) is untouched, as is `.tab-pane` display logic.
+ *  - Every state carries a glyph and a word in the markup; colour here is
+ *    reinforcement, never the only cue.
+ * ==========================================================================*/
+
+/* ========================================================================== *
+ * 1. VIEW SWAP — legacy research table out, map in
+ * ========================================================================== */
+
+/* The legacy rows stay in the document: refreshResearches(), science.js's
+   update*Display() passes and solCenter.js all write to them, several without
+   a null guard. We only take the table out of view. */
+html[data-ui="modern"][data-research="graph"] #scTechCenter ~ .container #techTable {
+  display: none;
+}
+
+/* The research sub-nav ("Science Production" / "Technologies") is a legacy
+   300px floated 4-column table. It still owns pane switching — `data-toggle`
+   plus `activeResearchTab()`, which writes `class="sideTab"` / adds `info` — so
+   the rows, ids and handlers are left completely alone; only the box they draw
+   in changes, from a sidebar into a segmented control above the workspace.
+   `.info` is restyled here because Bootstrap paints it near-white, which is
+   unreadable on the dark shell. */
+html[data-ui="modern"][data-research="graph"] #research > .container:first-child {
+  width: 100% !important;
+  float: none !important;
+  padding: 0;
+  margin-bottom: var(--sc-sp-4);
+}
+html[data-ui="modern"][data-research="graph"] #research > .container:first-child > table {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-sp-2);
+  width: auto;
+  margin: 0;
+  background: none;
+}
+html[data-ui="modern"][data-research="graph"] #research > .container:first-child tbody {
+  display: contents;
+}
+html[data-ui="modern"][data-research="graph"] #research > .container:first-child tr {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-sp-2);
+  height: auto !important;
+  min-height: 44px;
+  padding: 0 var(--sc-sp-4);
+  background: var(--sc-surface-1);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-2);
+}
+html[data-ui="modern"][data-research="graph"] #research > .container:first-child td {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-width: 0;
+  border: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  white-space: nowrap;
+}
+html[data-ui="modern"][data-research="graph"] #research > .container:first-child img {
+  width: 22px !important;
+}
+/* Bootstrap paints `.info` on the CELLS, so the row-level rule alone would not
+   win; both are set, and both keep dark-shell-legible text. */
+html[data-ui="modern"][data-research="graph"] #research > .container:first-child tr.info {
+  background: var(--sc-cyan-faint) !important;
+  border-color: var(--sc-cyan-dim);
+}
+html[data-ui="modern"][data-research="graph"] #research > .container:first-child tr.info td,
+html[data-ui="modern"][data-research="graph"] #research > .container:first-child tr.info span {
+  color: var(--sc-text-strong) !important;
+}
+
+/* The technologies pane was a max-width:800px float; the map wants the room. */
+html[data-ui="modern"][data-research="graph"] #technologiesTab {
+  margin-left: 0 !important;
+  float: none !important;
+  width: 100%;
+}
+html[data-ui="modern"][data-research="graph"] #technologiesTab > .container {
+  max-width: none !important;
+  width: 100%;
+  padding: 0;
+}
+
+/* ========================================================================== *
+ * 2. SHELL
+ * ========================================================================== */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sc-sp-4);
+  margin-bottom: var(--sc-sp-5);
+  color: var(--sc-text);
+  font-family: var(--sc-font-ui);
+}
+
+/* --- header ------------------------------------------------------------- */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__head {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  grid-template-areas:
+    'lead  stats   actions'
+    'meter meter   meter';
+  align-items: center;
+  gap: var(--sc-sp-3) var(--sc-sp-5);
+  padding: var(--sc-sp-4) var(--sc-sp-5);
+  background: var(--sc-surface-glass);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-1);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__lead { grid-area: lead; }
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__title {
+  margin: 0;
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-lg);
+  letter-spacing: var(--sc-tracking-label);
+  color: var(--sc-text-strong);
+  text-transform: uppercase;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__sub {
+  margin: var(--sc-sp-1) 0 0;
+  font-size: var(--sc-fs-sm);
+  color: var(--sc-text-muted);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__stats {
+  grid-area: stats;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-sp-5);
+  margin: 0;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__stat { margin: 0; }
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__stat-label {
+  margin: 0;
+  font-size: var(--sc-fs-xs);
+  font-weight: 500;
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+  white-space: nowrap;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__stat-value {
+  margin: 2px 0 0;
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-fs-md);
+  font-variant-numeric: tabular-nums;
+  color: var(--sc-text-strong);
+  white-space: nowrap;
+}
+
+html[data-ui="modern"][data-research="graph"] #scTechScience { color: var(--sc-cyan); }
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__meter {
+  grid-area: meter;
+  position: relative;
+  height: 4px;
+  border-radius: var(--sc-r-pill);
+  background: rgba(126, 166, 214, 0.14);
+  overflow: hidden;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__meter-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--sc-cyan-dim), var(--sc-cyan));
+  transition: width var(--sc-dur-3) var(--sc-ease-out);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__actions {
+  grid-area: actions;
+  display: flex;
+  gap: var(--sc-sp-2);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__btn {
+  min-height: 44px;
+  padding: 0 var(--sc-sp-4);
+  font-size: var(--sc-fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--sc-text);
+  background: var(--sc-surface-2);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  border-radius: var(--sc-r-2);
+  cursor: pointer;
+  transition: background var(--sc-dur-1) var(--sc-ease), color var(--sc-dur-1) var(--sc-ease);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__btn:hover {
+  background: var(--sc-surface-3);
+  color: var(--sc-text-strong);
+}
+
+/* --- legend -------------------------------------------------------------- */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__legend {
+  padding: var(--sc-sp-3) var(--sc-sp-5);
+  background: var(--sc-surface-1);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-sp-2) var(--sc-sp-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-sp-2);
+  font-size: var(--sc-fs-sm);
+  color: var(--sc-text-secondary);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__legend-glyph {
+  width: 20px;
+  text-align: center;
+  font-size: var(--sc-fs-md);
+}
+
+/* ========================================================================== *
+ * 3. WORKSPACE — pan/scroll is confined here, never to the page
+ * ========================================================================== */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--sc-sp-4);
+  align-items: start;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__viewport {
+  position: relative;
+  max-height: min(78vh, 780px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(53, 224, 214, 0.06), transparent 60%),
+    var(--sc-space-1);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-1);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__canvas {
+  position: relative;
+}
+
+/* Stage sections carry the reading order; the map positions their children. */
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="graph"] .sc-tech__stage {
+  display: contents;
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="graph"] .sc-tech__stage-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- connectors: behind everything, never interactive -------------------- */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__wires {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__band {
+  fill: rgba(126, 166, 214, 0.035);
+  stroke: rgba(126, 166, 214, 0.09);
+  stroke-width: 1;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__edge {
+  fill: none;
+  stroke: rgba(126, 166, 214, 0.16);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 5;
+}
+
+/* The arrowhead states the direction of progression explicitly. */
+html[data-ui="modern"][data-research="graph"] .sc-tech__edge-head {
+  fill: rgba(126, 166, 214, 0.22);
+  stroke: none;
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech__edge-head.sc-edge-active { fill: rgba(126, 166, 214, 0.45); }
+html[data-ui="modern"][data-research="graph"] .sc-tech__edge-head.sc-edge-complete { fill: var(--sc-cyan-dim); }
+html[data-ui="modern"][data-research="graph"] .sc-tech__edge-head.sc-is-highlighted { fill: var(--sc-cyan-bright); }
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__edge.sc-edge-active {
+  stroke: rgba(126, 166, 214, 0.34);
+  stroke-dasharray: 4 4;
+}
+
+/* A completed prerequisite draws a solid, energised line — the visual record
+   of the route the company actually took. */
+html[data-ui="modern"][data-research="graph"] .sc-tech__edge.sc-edge-complete {
+  stroke: var(--sc-cyan-dim);
+  stroke-width: 2;
+  stroke-dasharray: none;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__edge.sc-is-highlighted {
+  stroke: var(--sc-cyan-bright);
+  stroke-width: 2.5;
+  stroke-dasharray: none;
+}
+
+/* --- lane + stage labels ------------------------------------------------- */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__lanes,
+html[data-ui="modern"][data-research="graph"] .sc-tech__columns {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__lane-label {
+  position: absolute;
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-xs);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__column-label {
+  position: absolute;
+  top: 18px;
+  font-size: var(--sc-fs-xs);
+  font-weight: 600;
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: rgba(109, 127, 151, 0.7);
+  text-align: center;
+}
+
+/* ========================================================================== *
+ * 4. TECHNOLOGY NODE
+ * ========================================================================== */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="graph"] .sc-tech-node {
+  position: absolute;
+  z-index: 2;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node {
+  display: flex;
+  flex-direction: column;
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  background: var(--sc-surface-1);
+  box-shadow: var(--sc-elev-1);
+  overflow: hidden;
+}
+
+/* --- concealed vs revealed ---------------------------------------------- */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__fog {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sc-sp-1);
+  color: var(--sc-text-muted);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-is-concealed {
+  background: rgba(13, 21, 36, 0.5);
+  border-style: dashed;
+  border-color: rgba(126, 166, 214, 0.12);
+  box-shadow: none;
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-is-concealed .sc-tech-node__fog {
+  display: flex;
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-is-concealed .sc-tech-node__select,
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-is-concealed .sc-tech-node__buy {
+  display: none;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-undiscovered { opacity: 0.5; }
+
+/* "Directly ahead of you" reads brighter than the far fog. */
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-preview {
+  opacity: 0.85;
+  border-color: rgba(126, 166, 214, 0.22);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__fog-glyph { font-size: 22px; }
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__fog-label {
+  font-size: var(--sc-fs-xs);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+}
+
+/* --- the selectable body ------------------------------------------------- */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__select {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  padding: var(--sc-sp-3) var(--sc-sp-3) var(--sc-sp-2);
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--sc-fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--sc-fs-base);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--sc-text-strong);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__meta {
+  font-size: var(--sc-fs-xs);
+  color: var(--sc-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__cost {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: auto;
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--sc-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__cost.sc-is-affordable { color: var(--sc-positive); }
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__cost.sc-is-short { color: var(--sc-negative); }
+
+/* Once a technology is complete this line carries prose, not a figure: it wraps
+   instead of truncating, because an ellipsised effect tells the player nothing. */
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__cost.sc-is-done {
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--sc-font-ui);
+  font-size: var(--sc-fs-xs);
+  line-height: 1.35;
+  color: var(--sc-text-muted);
+  white-space: normal;
+  overflow: hidden;
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__cost.sc-is-done .sc-tech-node__cost-value {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --- the research action ------------------------------------------------- */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__buy {
+  min-height: 34px;
+  padding: 0 var(--sc-sp-3);
+  font-size: var(--sc-fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--sc-text-on-accent);
+  background: var(--sc-cyan);
+  border: 0;
+  border-top: var(--sc-bw-1) solid var(--sc-border);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__buy:hover:not([disabled]) {
+  background: var(--sc-cyan-bright);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__buy[disabled] {
+  color: var(--sc-text-muted);
+  background: var(--sc-surface-2);
+  cursor: not-allowed;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__buy[aria-hidden="true"] { display: none; }
+
+/* --- per-state node treatment (shape + border + glyph, not colour alone) -- */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-ready {
+  border-color: var(--sc-cyan-dim);
+  box-shadow: var(--sc-glow-cyan);
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-ready .sc-tech-node__badge { color: var(--sc-cyan); }
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-blocked {
+  border-color: rgba(255, 93, 108, 0.35);
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-blocked .sc-tech-node__badge { color: var(--sc-negative); }
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-progressing {
+  border-color: var(--sc-amber-dim);
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-progressing .sc-tech-node__badge { color: var(--sc-amber); }
+
+/* Completed research stays on the map as history: legible, but visibly past. */
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-researched,
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-maxed {
+  background: rgba(71, 217, 141, 0.05);
+  border-color: rgba(71, 217, 141, 0.3);
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-researched .sc-tech-node__badge,
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-state-maxed .sc-tech-node__badge {
+  color: var(--sc-positive);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech-node.sc-is-selected {
+  border-color: var(--sc-cyan-bright);
+  box-shadow: 0 0 0 2px var(--sc-cyan-bright), var(--sc-elev-2);
+}
+
+/* Focus is always visible, and never depends on the selection ring. */
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__select:focus-visible,
+html[data-ui="modern"][data-research="graph"] .sc-tech-node__buy:focus-visible,
+html[data-ui="modern"][data-research="graph"] .sc-tech__btn:focus-visible,
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-buy:focus-visible {
+  outline: none;
+  box-shadow: var(--sc-focus-ring);
+}
+
+/* ========================================================================== *
+ * 5. INSPECTOR
+ * ========================================================================== */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__inspector {
+  position: sticky;
+  top: var(--sc-sp-4);
+  padding: var(--sc-sp-4);
+  background: var(--sc-surface-glass);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-1);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__inspector-empty > .sc-tech__panel-heading {
+  margin-top: 0;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__frontier {
+  margin: 0;
+  padding-left: var(--sc-sp-4);
+  font-size: var(--sc-fs-sm);
+  line-height: 1.6;
+  color: var(--sc-text-secondary);
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech__frontier li::marker { color: var(--sc-cyan); }
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__inspector-hint {
+  margin: var(--sc-sp-3) 0 0;
+  font-size: var(--sc-fs-xs);
+  color: var(--sc-text-muted);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--sc-fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-secondary);
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-state.sc-state-ready { color: var(--sc-cyan); }
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-state.sc-state-blocked { color: var(--sc-negative); }
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-state.sc-state-progressing { color: var(--sc-amber); }
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-state.sc-state-researched,
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-state.sc-state-maxed { color: var(--sc-positive); }
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-name {
+  margin: var(--sc-sp-2) 0 2px;
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-md);
+  letter-spacing: 0.04em;
+  color: var(--sc-text-strong);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-type {
+  margin: 0;
+  font-size: var(--sc-fs-xs);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-desc {
+  margin: var(--sc-sp-3) 0;
+  font-size: var(--sc-fs-sm);
+  line-height: var(--sc-lh-base);
+  color: var(--sc-text-secondary);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__facts {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 var(--sc-sp-3);
+  padding: var(--sc-sp-3) 0;
+  border-top: var(--sc-bw-1) solid var(--sc-divider);
+  border-bottom: var(--sc-bw-1) solid var(--sc-divider);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__fact {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sc-sp-3);
+  font-size: var(--sc-fs-sm);
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech__fact dt {
+  font-weight: 500;
+  color: var(--sc-text-muted);
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech__fact dd {
+  margin: 0;
+  font-family: var(--sc-font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--sc-text-strong);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-heading {
+  margin: var(--sc-sp-3) 0 var(--sc-sp-2);
+  font-size: var(--sc-fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__prereqs,
+html[data-ui="modern"][data-research="graph"] .sc-tech__effects {
+  margin: 0;
+  padding-left: var(--sc-sp-4);
+  font-size: var(--sc-fs-sm);
+  line-height: var(--sc-lh-base);
+  color: var(--sc-text-secondary);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-note {
+  margin: var(--sc-sp-3) 0 0;
+  padding: var(--sc-sp-2) var(--sc-sp-3);
+  font-size: var(--sc-fs-xs);
+  line-height: var(--sc-lh-base);
+  color: var(--sc-text-secondary);
+  background: var(--sc-info-bg);
+  border-left: var(--sc-bw-2) solid var(--sc-info);
+  border-radius: var(--sc-r-1);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-buy {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: var(--sc-sp-4);
+  padding: 0 var(--sc-sp-4);
+  font-size: var(--sc-fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--sc-text-on-accent);
+  background: var(--sc-cyan);
+  border: 0;
+  border-radius: var(--sc-r-2);
+  cursor: pointer;
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-buy:hover:not([disabled]) {
+  background: var(--sc-cyan-bright);
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech__panel-buy[disabled] {
+  color: var(--sc-text-muted);
+  background: var(--sc-surface-2);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  cursor: not-allowed;
+}
+
+/* Our own collapse utility — the legacy `.hidden` contract is never touched. */
+html[data-ui="modern"][data-research="graph"] .sc-is-collapsed { display: none !important; }
+
+/* ========================================================================== *
+ * 6. PATHWAY MODE — phones get a vertical progression, not a shrunken map
+ * ========================================================================== */
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__viewport {
+  max-height: none;
+  overflow: visible;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Geometry belongs to the map only; the pathway is ordinary document flow. */
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__wires,
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__lanes,
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__columns {
+  display: none;
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__stage {
+  position: relative;
+  display: block;
+  margin-bottom: var(--sc-sp-5);
+  padding-left: var(--sc-sp-5);
+}
+
+/* The simplified connector: one spine down the stage. */
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__stage::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 7px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--sc-cyan-dim), rgba(126, 166, 214, 0.12));
+  border-radius: var(--sc-r-pill);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__stage-title {
+  margin: 0 0 var(--sc-sp-2);
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-xs);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech-node {
+  position: static !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0;
+  margin-bottom: var(--sc-sp-2);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech-node__select {
+  min-height: 44px;
+  padding: var(--sc-sp-3);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech-node__buy {
+  min-height: 44px;
+}
+
+/* Concealed nodes collapse to a slim marker so the frontier stays on screen. */
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech-node.sc-is-concealed {
+  min-height: 0;
+}
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech-node__fog {
+  flex-direction: row;
+  gap: var(--sc-sp-2);
+  padding: var(--sc-sp-2) var(--sc-sp-3);
+}
+
+html[data-ui="modern"][data-research="graph"] .sc-tech[data-layout="path"] .sc-tech__inspector {
+  position: static;
+  margin-top: var(--sc-sp-4);
+}
+
+/* ========================================================================== *
+ * 7. NARROW-VIEWPORT HEADER + REDUCED MOTION
+ * ========================================================================== */
+
+@media (max-width: 900px) {
+  html[data-ui="modern"][data-research="graph"] .sc-tech__head {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'lead' 'stats' 'meter' 'actions';
+  }
+  html[data-ui="modern"][data-research="graph"] .sc-tech__stats {
+    gap: var(--sc-sp-3) var(--sc-sp-5);
+  }
+  html[data-ui="modern"][data-research="graph"] .sc-tech__actions .sc-tech__btn {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui="modern"][data-research="graph"] .sc-tech__meter-fill,
+  html[data-ui="modern"][data-research="graph"] .sc-tech__btn,
+  html[data-ui="modern"][data-research="graph"] .sc-tech-node__buy {
+    transition: none;
+  }
+}

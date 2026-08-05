@@ -11,6 +11,9 @@
 	<!-- M2 resource view: card dashboard by default. ?resources=legacy (or the
 	     global ?ui=legacy) restores the original resource table. URL only. -->
 	<script>document.documentElement.setAttribute('data-resources', /[?&](?:ui|resources)=legacy(?:&|$)/i.test(location.search) ? 'legacy' : 'cards');</script>
+	<!-- M3 research view: technology map by default. ?research=legacy (or the
+	     global ?ui=legacy) restores the original #techTable. URL only. -->
+	<script>document.documentElement.setAttribute('data-research', /[?&](?:ui|research)=legacy(?:&|$)/i.test(location.search) ? 'legacy' : 'graph');</script>
 	<link href="SpaceCompanyFavicon.png" rel="shortcut icon" type="image/x-icon" />
 	<link href="lib/bootstrap.min.css" rel="stylesheet" type="text/css" id="theme_css"/>
 	<link href="lib/pnotify.custom.min.css" rel="stylesheet" type="text/css">
@@ -26,6 +29,8 @@
 	<link href="styles/modern/responsive.css" rel="stylesheet">
 	<!-- M2 responsive resource operations dashboard. -->
 	<link href="styles/modern/resources.css" rel="stylesheet">
+	<!-- M3 research command center (technology map). -->
+	<link href="styles/modern/research.css" rel="stylesheet">
 	<script type="text/javascript" src="ui/modern/shell.js"></script>
 
 
@@ -7222,6 +7227,11 @@
      borrow the legacy number-formatting delegates; registers itself in
      Game.uiComponents. Presentation only — read-only over game state. -->
 <script type="text/javascript" src="ui/modern/resourceDashboard.js"></script>
+<!-- M3: read-only technology graph projection + the research command center
+     that renders it. Registers itself in Game.uiComponents. The canonical
+     purchase path (science.js purchaseTech) is dispatched, never replaced. -->
+<script type="text/javascript" src="ui/modern/techGraph.js"></script>
+<script type="text/javascript" src="ui/modern/techCommandCenter.js"></script>
 
 <script type="text/javascript" src="core.js"></script>
 <script type="text/javascript" src="notification.js"></script>
