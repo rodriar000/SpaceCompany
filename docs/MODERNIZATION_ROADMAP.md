@@ -39,7 +39,7 @@ Guiding principles:
 - Deferred to M2: the true responsive resource dashboard (M1 only lightly
   restyles the resource rows).
 
-## M2 — Modern responsive resource dashboard 🚧 (implemented on `feature/m2-...`, pending review)
+## M2 — Modern responsive resource dashboard ✅ (merged into `dev`)
 
 - ✅ Replaced the fixed-380px, four-column resource table with a responsive
   **resource-card dashboard** (`ui/modern/resourceDashboard.js`,
@@ -61,10 +61,38 @@ Guiding principles:
 - Evidence: [M2_RESOURCE_DASHBOARD.md](M2_RESOURCE_DASHBOARD.md).
 - Deferred to M5: live-region announcements for storage-full / energy-deficit.
 
-## M3 — Research & progression visualization
+## M3 — Technology graph & progression command center 🚧 (implemented on `feature/m3-...`, pending review)
 
-- Visualize tech/research and progression trees over the existing `Game.tech`
-  data. Presentation only; unlock conditions unchanged.
+- ✅ Replaced the flat `#techTable` with a **technology map**
+  (`ui/modern/techGraph.js`, `ui/modern/techCommandCenter.js`,
+  `styles/modern/research.css`): stage columns flowing left→right, themed lane
+  bands, SVG connectors with direction arrows, a progression header, a legend,
+  a frontier focus control and a selected-technology inspector.
+- ✅ The map is a **read-only projection** of `Game.tech` / `Game.techData`.
+  Edges are derived only from canonical `newTechs`; nothing infers a
+  prerequisite. Technologies unlocked from outside `newTechs` (`unlockPSU` via
+  `core.js`, the Sol Center trio, the four science-threshold upgrades) are
+  flagged and explained rather than given invented edges.
+- ✅ **Canonical purchase only.** Researching dispatches a real click on the
+  legacy `<button onclick="purchaseTech('…')">`, falling back to
+  `purchaseTech(id)`; never both, exactly once. No science is deducted, no
+  `apply`/`onApply` is called, and `unlocked`/`current` are never written by
+  modern code.
+- ✅ **Spoiler-safe.** Concealment is enforced in the model: an undiscovered
+  technology exposes the literal name `"Undiscovered"`, a `null` cost and no
+  effects, and is removed from the tab order and the accessibility tree.
+- ✅ Distinct **mobile pathway** below 900px — a vertical, stage-grouped
+  progression rather than a shrunken map. Tablet behaviour was chosen on real
+  viewport evidence (1024 keeps the map, 768 switches).
+- ✅ No gameplay, balance, progression, economy or save-schema change; M3 stores
+  nothing in `localStorage`, not even a preference key.
+- ✅ Fallbacks: `?research=legacy` (modern shell, legacy table) and `?ui=legacy`
+  (original presentation). Both URL-only, both byte-verified against the save.
+- Evidence: [M3_VISUAL_ACCEPTANCE.md](M3_VISUAL_ACCEPTANCE.md); architecture in
+  [M3_TECHNOLOGY_GRAPH.md](M3_TECHNOLOGY_GRAPH.md) and
+  [M3_TECHNOLOGY_CONTRACT.md](M3_TECHNOLOGY_CONTRACT.md).
+- Deferred to M4/M5: a zoom-out control for the map, live-region announcements,
+  and edge-crossing minimisation if the data ever gains multi-parent nodes.
 
 ## M4 — Interactive solar-system experience
 

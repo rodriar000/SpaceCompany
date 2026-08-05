@@ -70,6 +70,12 @@ class Element {
     return name in this.attributes ? this.attributes[name] : null;
   }
 
+  removeAttribute(name) {
+    delete this.attributes[name];
+    if (name === 'class') this.className = '';
+    if (name === 'id') this.id = '';
+  }
+
   get firstChild() {
     return this.childNodes[0] || null;
   }

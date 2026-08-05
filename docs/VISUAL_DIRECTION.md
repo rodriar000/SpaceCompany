@@ -226,3 +226,38 @@ Evidence: [M2_RESOURCE_DASHBOARD.md](M2_RESOURCE_DASHBOARD.md).
 - **Density is persisted outside the save**, under `sc.ui.resourceDensity` — the
   first use of the `sc.ui.*` presentation-preference namespace anticipated in M1
   (see SAVE_COMPATIBILITY.md).
+
+
+## Technology map (M3)
+
+The research view is the third surface built on these tokens, after the shell
+(M1) and the resource dashboard (M2). It reuses the same glass panels, hairline
+borders, `--sc-font-display` uppercase headings, monospace tabular figures and
+reactor-cyan accent, so research does not read as a different product.
+
+Rules specific to the map:
+
+- **Direction is a design element.** Progression flows left → right; stage
+  columns and lane bands are labelled; connectors carry arrowheads. A player
+  should be able to read the direction of the tree without reading a single
+  description.
+- **Time is encoded in the line, not just the node.** A satisfied prerequisite
+  draws solid and energised; a discovered-but-unbought one draws dashed; an
+  undiscovered one draws faint. The route the company took is legible as a path.
+- **Every state has a word and a glyph.** `Ready to research ▶`,
+  `Not enough science ✕`, `In progress ↻`, `Researched ✓`,
+  `Fully researched ✦`, `Undiscovered · next ◈`, `Undiscovered ◇`. Colour is
+  reinforcement only — the seven states remain distinguishable in greyscale.
+- **Fog conceals content, not shape.** An undiscovered node keeps its position
+  and its outline (dashed, dimmed) but shows no name, cost or effect. The player
+  can see that a branch exists and where it leads; they cannot read it yet.
+- **Connectors are furniture.** Behind the nodes, `pointer-events: none`,
+  `aria-hidden`. They may never intercept a click or reach a screen reader.
+- **Pan lives in the workspace.** `#scTechViewport` scrolls; the page never
+  does horizontally.
+- **Phones get a different composition, not a smaller one.** Below 900px the map
+  becomes a vertical stage-by-stage pathway with full-width cards and 44px
+  targets, because a 1920px canvas scaled to 390px is not a design.
+
+See [M3_TECHNOLOGY_GRAPH.md](M3_TECHNOLOGY_GRAPH.md) for the layout algorithm
+and [M3_VISUAL_ACCEPTANCE.md](M3_VISUAL_ACCEPTANCE.md) for the evidence.

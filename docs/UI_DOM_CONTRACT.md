@@ -9,7 +9,10 @@ M2 replaces the **presentation** of the resource list with a card dashboard,
 still without changing this contract — the legacy rows remain in the document,
 data-bound and authoritative (see "M2 resource dashboard" below).
 
-This document records what must not change so future milestones (M3+) can
+M3 replaces the **presentation** of the research technology list the same way,
+leaving `#techTable` and its rows in the DOM (see "M3 research command center").
+
+This document records what must not change so future milestones (M4+) can
 restructure safely.
 
 ## Golden rules
@@ -109,11 +112,65 @@ Rules for anyone touching this area:
 The header brand cluster can be wrapped in new layout containers provided the
 inner IDs/handlers survive.
 
-## Elements safe to REPLACE later (M3+)
+## M3 research command center — how the technology list was replaced
 
-- Research / solar-system / interstellar views → **M3/M4**.
+M3 did **not** rewrite `#techTable`. The table and every `<tr id="<techId>">`
+stay in the document with their ids, `#<techId>Title` / `#<techId>Cost` /
+`#<techId>Button` children and inline `onclick="purchaseTech('…')"` handlers
+intact. This is not politeness — it is required:
+
+- `solCenter.js` does `document.getElementById("unlockPlasma").className = ""`
+  with **no null guard**, and `core.js`'s `refreshResearches()` does the same for
+  a dozen more ids (its first loop over the vestigial `researched` array is
+  unguarded too);
+- `science.js` writes `#<id>Title` and `#<id>Cost` for the four efficiency
+  upgrades on every 100 ms tick.
+
+What changed is only what the player sees:
+
+- `ui/modern/techCommandCenter.js` inserts `#scTechCenter` as the first child of
+  `#technologiesTab` and renders one `<article id="scTech-<techId>">` per
+  technology over the projection built by `ui/modern/techGraph.js`.
+- `styles/modern/research.css` hides the legacy table with
+  `html[data-ui="modern"][data-research="graph"] #scTechCenter ~ .container #techTable { display:none }`.
+  The **sibling combinator is load-bearing**, exactly as in M2: the table is only
+  out of view while the map genuinely exists, so a failed build degrades to the
+  legacy interface.
+
+New selectors owned by M3 are listed in
+[M3_TECHNOLOGY_CONTRACT.md](M3_TECHNOLOGY_CONTRACT.md) section 6.
+
+Rules for anyone touching this area:
+
+1. **Never invert the direction of truth.** The map reads `unlocked` / `current`
+   from `Game.tech`; it must never write them. Unlocking stays the job of
+   `apply()` / `refreshResearches()` / `solCenter.js`.
+2. **Purchase by delegation.** A node's Research button dispatches a real
+   `click()` on `#<techId>Button` so the canonical inline handler runs, falling
+   back to `purchaseTech(id)` only when that button is absent — never both, and
+   never twice.
+3. **Keep the row shape the projection falls back to**: `<tr id="<techId>">`
+   plus `#<techId>Button`. `test/researchCommandCenter.test.mjs` fails if the
+   legacy buttons stop existing in map mode.
+4. **Do not reuse `.hidden` for modern state.** The map uses its own
+   `sc-is-concealed` / `sc-is-revealed` / `sc-state-*` / `sc-is-collapsed`
+   classes. `research.css` contains no `.hidden` selector at all — asserted by
+   `test/researchCommandCenter.test.mjs`.
+5. **The research sub-nav is restyled, not rebuilt.** `#scienceNav` /
+   `#technologiesNav` keep their ids, `data-toggle="tab"` and
+   `onclick="activeResearchTab(…)"`; only the box they draw in changes (sidebar
+   → segmented control), plus a `.info` contrast fix because Bootstrap paints it
+   near-white on the dark shell.
+6. **Pan/scroll belongs to `#scTechViewport`**, never to the page. Nothing may
+   give the document horizontal overflow.
+
+## Elements safe to REPLACE later (M4+)
+
+- Solar-system / interstellar views → **M4**.
 - The resource **detail panel** internals (`#resourceTabParent` panes: gain
   buttons, machine tables, storage upgrades) — M2 only widened them.
+- The `#scienceTab` pane (laboratory tiers) — M3 restyled only the sub-nav that
+  switches to it, not the pane itself.
 
 ## Known responsive hazards (legacy)
 
