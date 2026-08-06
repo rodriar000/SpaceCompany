@@ -21,14 +21,17 @@ compatibility**.
 - **Upstream:** https://github.com/sparticle999/SpaceCompany
 - **This fork:** https://github.com/rodriar000/SpaceCompany
 
-## Status: Milestone M4 — Celestial Operations & Interstellar Navigation
+## Status: Milestone M5a — Performance Foundation
 
 **M0** established a reproducible dev environment, characterization tests and
 documentation. **M1** layered a premium, dark, cinematic command-center
 interface over the legacy game and removed inherited Google Analytics and the
 Kongregate script. **M2** replaced the fixed-width, four-column resource table
 with a responsive **resource-card dashboard**. **M3 (this branch)** replaces the
-flat research table with a **technology map**. **M4 (this branch)** replaces the
+flat research table with a **technology map**. **M5a (this branch)** removes the game's dominant per-tick cost — a memoised
+number formatter cuts combined modern UI work from 4.9 ms to 0.9 ms (p95) and
+`Game.fastUpdate` from 12.9 ms to 1.6 ms — and drops the last third-party
+runtime request (Google Fonts). **M4** replaced the
 solar-system navigation column with a **celestial operations command center**:
 a deterministic orbital map, an interstellar network gated by the canonical
 telescope reach, a destination inspector, frontier focus, and a vertical mission
@@ -60,6 +63,8 @@ See [`docs/`](docs/) for the full analysis:
 - [`docs/M3_TECHNOLOGY_GRAPH.md`](docs/M3_TECHNOLOGY_GRAPH.md) — graph derivation, visibility policy, layout algorithm, performance, accessibility.
 - [`docs/M3_VISUAL_ACCEPTANCE.md`](docs/M3_VISUAL_ACCEPTANCE.md) — M3 verification, purchase parity, screenshots, critical assessment.
 - [`docs/M4_CELESTIAL_OPERATIONS.md`](docs/M4_CELESTIAL_OPERATIONS.md) — M4 celestial model, action delegation, duplicate-ID audit, performance, screenshots.
+- [`docs/M5A_PERFORMANCE_FOUNDATION.md`](docs/M5A_PERFORMANCE_FOUNDATION.md) — the formatter bottleneck, cache design and dependency proof, parity corpus, measured results.
+- [`docs/PERFORMANCE_BUDGETS.md`](docs/PERFORMANCE_BUDGETS.md) — the budgets the modern UI is held to, and how they are measured.
 - [`docs/PRIVACY.md`](docs/PRIVACY.md) — tracking removed and remaining network calls.
 - [`docs/RISK_REGISTER.md`](docs/RISK_REGISTER.md) — risks identified during forensics.
 
@@ -78,8 +83,11 @@ See [`docs/`](docs/) for the full analysis:
 
 All four switches are diagnostic escape hatches: they are read from the URL
 each load and are **never** written to your save. The only preference the modern
-UI stores is resource-card density, under its own `sc.ui.resourceDensity` key;
-the technology map and the celestial command center store nothing at all.
+UI stores are presentation preferences under the `sc.ui.*` namespace
+(`resourceDensity`, `motion`, `announcements`, `audioEnabled`, `audioVolume`),
+none of which is written until you change it, and all of which can be removed
+without touching your save. The technology map and celestial command center
+store nothing at all.
 
 ## Requirements
 

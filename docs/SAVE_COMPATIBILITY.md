@@ -22,6 +22,19 @@ object, and their loss only resets a display choice:
 | --- | --- | --- |
 | `sc.ui.resourceDensity` | `ui/modern/resourceDashboard.js` (M2) | `comfortable` \| `compact` — resource-card density. |
 
+M5a adds four presentation preferences under the existing namespace —
+`sc.ui.motion`, `sc.ui.announcements`, `sc.ui.audioEnabled` (default `false`)
+and `sc.ui.audioVolume` — none of which is written until the user changes it.
+They are read through `window.SpaceCompanyUI.get()`, which falls back to the
+default for a missing, corrupt or out-of-range value, and clamps volume to 0–1.
+`SpaceCompanyUI.resetPreferences()` removes **only** `sc.ui.*` keys and leaves
+`localStorage["save"]` byte-identical. Enforced by `test/uiRuntime.test.mjs`.
+
+Note also that `Game.settings.entries.formatter` **is** part of the save and is
+restored in place by `Game.settings.load`. The M5a formatter cache keys on that
+value rather than on function identity, so loading a save with a different
+number format cannot serve stale text.
+
 M4 likewise adds **no key at all**: `ui/modern/celestialModel.js` and
 `ui/modern/celestialCommandCenter.js` never touch `localStorage`, and the
 selected destination is module state that dies with the page. `?space=legacy` is
