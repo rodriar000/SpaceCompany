@@ -186,15 +186,19 @@ test('the memoised formatter is byte-identical to the original', () => {
 
 test('a repeated value is served from the cache, not recomputed', () => {
   const { ctx, api } = mount();
+  /* Count where the work actually happens: the memo closes over the original
+     `format`, so patching `__scOriginal` would intercept nothing and the
+     assertion would pass vacuously. */
+  const raw = ctx.Game.utils.formatters.shortName;
   let calls = 0;
-  const raw = ctx.Game.settings.format.__scOriginal;
-  ctx.Game.settings.format.__scOriginal = function () { calls++; return raw.apply(this, arguments); };
+  ctx.Game.utils.formatters.shortName = function () { calls++; return raw.apply(this, arguments); };
 
   const first = ctx.Game.settings.format(1234567);
-  const callsAfterFirst = calls;
+  assert.equal(calls, 1, 'the first call computes exactly once');
   for (let i = 0; i < 50; i++) assert.equal(ctx.Game.settings.format(1234567), first);
 
-  assert.equal(calls, callsAfterFirst, '50 repeats must not call the original again');
+  assert.equal(calls, 1, '50 repeats must not recompute');
+  ctx.Game.utils.formatters.shortName = raw;
   assert.ok(api.formatterCacheStats().hits >= 50);
 });
 
