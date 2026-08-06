@@ -20,9 +20,10 @@
 	<link href="SpaceCompanyFavicon.png" rel="shortcut icon" type="image/x-icon" />
 	<link href="lib/bootstrap.min.css" rel="stylesheet" type="text/css" id="theme_css"/>
 	<link href="lib/pnotify.custom.min.css" rel="stylesheet" type="text/css">
-	<!-- Orbitron (display wordmark). Retained with graceful system fallback in
-	     styles/modern/tokens.css; see docs/PRIVACY.md. -->
-	<link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+	<!-- M5: the Orbitron webfont request to fonts.googleapis.com was removed.
+	     The display face now resolves from a documented local/system stack in
+	     styles/modern/tokens.css, so the game makes no third-party font
+	     request at runtime. See docs/PRIVACY.md and docs/ACCESSIBILITY.md. -->
 	<link href="style.css" rel="stylesheet">
 	<!-- M1 premium sci-fi design system (loaded after legacy CSS to layer over it). -->
 	<link href="styles/modern/tokens.css" rel="stylesheet">
@@ -36,6 +37,9 @@
 	<link href="styles/modern/research.css" rel="stylesheet">
 	<!-- M4 celestial operations command center. -->
 	<link href="styles/modern/celestial.css" rel="stylesheet">
+	<!-- M5 shared modern UI runtime: preferences, motion policy, formatter
+	     memoisation and the single live-region announcer. -->
+	<script type="text/javascript" src="ui/modern/uiRuntime.js"></script>
 	<script type="text/javascript" src="ui/modern/shell.js"></script>
 
 

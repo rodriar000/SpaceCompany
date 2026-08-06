@@ -58,7 +58,12 @@
   --sc-focus-ring: 0 0 0 2px var(--sc-space-1), 0 0 0 4px var(--sc-focus);
 
   /* --- Typography families (system-first with graceful remote fallback) --- */
-  --sc-font-display: 'Orbitron', 'Eurostile', 'Bank Gothic', var(--sc-font-ui);
+  /* M5: the remote Orbitron request was removed. This stack resolves entirely
+     from fonts already present on the user's system, degrading to the UI face.
+     Nothing is fetched at runtime. See docs/ACCESSIBILITY.md. */
+  --sc-font-display: 'Orbitron', 'Eurostile', 'Bank Gothic', 'Michroma',
+    'Bahnschrift', 'DIN Alternate', 'Avenir Next Condensed', 'Futura',
+    'Trebuchet MS', var(--sc-font-ui);
   --sc-font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --sc-font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 
