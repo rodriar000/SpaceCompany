@@ -45,8 +45,26 @@ This is a deliberate, documented limitation.
 
 ## 2. Progression model
 
-**14 solar destinations** (1 launch site, 6 planets, 1 moon, 2 belts,
-1 station, 1 special site, plus survey stops), **13 routes**, **79 star systems**.
+**14 solar destinations**, **13 routes**, **79 star systems**.
+
+The 14 are mutually exclusive by primary type — they sum to exactly 14, with no
+destination counted twice:
+
+| Primary type | Count | Members |
+| --- | --- | --- |
+| `planet` | 8 | Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto |
+| `belt` | 2 | Asteroid Belt, Kuiper Belt |
+| `moon` | 1 | The Moon |
+| `station` | 1 | Wonder Station |
+| `special` | 1 | Sol Center |
+| `staging` | 1 | Launch Vehicle |
+| **Total** | **14** | |
+
+`survey` is a **state, not a type**: Mercury, Uranus and Neptune are three of the
+eight planets that happen to carry no canonical explore action (see below). They
+are *not* a fourteenth-plus category, and adding them to the table above would
+double-count them. Of the 14 destinations, **10 have a canonical explore
+action** — the launch site plus the three survey planets do not.
 
 ```
 Launch Vehicle ──▶ Moon · Mercury · Venus · Mars · Asteroid Belt      (inner)
