@@ -120,7 +120,7 @@ Game.interstellarUI = (function(){
 
         instance.factionStarTemplate = Handlebars.compile(
             ['<tr id="{{htmlId}}_conquer" class="hidden"><td colspan="1">',
-                '<h3 class="default btn-link" id="{{htmlId}}_name">{{name}}: <span id="{{htmlId}}_owned">Protected</span></h3>',
+                '<h3 class="default btn-link" id="{{htmlId}}_conquer_name">{{name}}: <span id="{{htmlId}}_owned">Protected</span></h3>',
                 '<h5>',
                     'Distance: {{distance}}<br>',
                     'Planets: {{planets}}<br>',

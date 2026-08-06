@@ -21,14 +21,18 @@ compatibility**.
 - **Upstream:** https://github.com/sparticle999/SpaceCompany
 - **This fork:** https://github.com/rodriar000/SpaceCompany
 
-## Status: Milestone M3 — Technology Graph & Progression Command Center
+## Status: Milestone M4 — Celestial Operations & Interstellar Navigation
 
 **M0** established a reproducible dev environment, characterization tests and
 documentation. **M1** layered a premium, dark, cinematic command-center
 interface over the legacy game and removed inherited Google Analytics and the
 Kongregate script. **M2** replaced the fixed-width, four-column resource table
 with a responsive **resource-card dashboard**. **M3 (this branch)** replaces the
-flat research table with a **technology map**: stage columns flowing left to
+flat research table with a **technology map**. **M4 (this branch)** replaces the
+solar-system navigation column with a **celestial operations command center**:
+a deterministic orbital map, an interstellar network gated by the canonical
+telescope reach, a destination inspector, frontier focus, and a vertical mission
+route on phones — plus a fix for 79 inherited duplicate DOM IDs. M3 delivered: stage columns flowing left to
 right, themed lane bands, SVG connectors with direction arrows, seven clearly
 distinguished states, a progression header, a frontier focus control and a
 selected-technology inspector — plus a distinct vertical progression pathway on
@@ -55,6 +59,7 @@ See [`docs/`](docs/) for the full analysis:
 - [`docs/M3_TECHNOLOGY_CONTRACT.md`](docs/M3_TECHNOLOGY_CONTRACT.md) — the canonical research boundary, the purchase path, legacy inconsistencies found.
 - [`docs/M3_TECHNOLOGY_GRAPH.md`](docs/M3_TECHNOLOGY_GRAPH.md) — graph derivation, visibility policy, layout algorithm, performance, accessibility.
 - [`docs/M3_VISUAL_ACCEPTANCE.md`](docs/M3_VISUAL_ACCEPTANCE.md) — M3 verification, purchase parity, screenshots, critical assessment.
+- [`docs/M4_CELESTIAL_OPERATIONS.md`](docs/M4_CELESTIAL_OPERATIONS.md) — M4 celestial model, action delegation, duplicate-ID audit, performance, screenshots.
 - [`docs/PRIVACY.md`](docs/PRIVACY.md) — tracking removed and remaining network calls.
 - [`docs/RISK_REGISTER.md`](docs/RISK_REGISTER.md) — risks identified during forensics.
 
@@ -66,13 +71,15 @@ See [`docs/`](docs/) for the full analysis:
   but restore the original resource table.
 - **Legacy research table:** append `?research=legacy` to keep the modern shell
   but restore the original `#techTable` research interface.
+- **Legacy celestial panes:** append `?space=legacy` to keep the modern shell but
+  restore the inherited solar-system navigation column.
 - **Legacy fallback:** append `?ui=legacy` to render the original Bootstrap
   presentation wholesale (this also restores both legacy tables).
 
-All three switches are diagnostic escape hatches: they are read from the URL
+All four switches are diagnostic escape hatches: they are read from the URL
 each load and are **never** written to your save. The only preference the modern
 UI stores is resource-card density, under its own `sc.ui.resourceDensity` key;
-the technology map stores nothing at all.
+the technology map and the celestial command center store nothing at all.
 
 ## Requirements
 

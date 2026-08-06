@@ -1,0 +1,532 @@
+/* ============================================================================
+ * Space Company — Modern Design System : CELESTIAL OPERATIONS (M4)
+ *
+ * The orbital map, interstellar network and destination inspector that replace
+ * the inherited solar-system navigation column.
+ *
+ * Scoping / safety
+ * ----------------
+ *  - Everything is scoped to html[data-ui="modern"][data-space="map"];
+ *    `?ui=legacy` and `?space=legacy` fall back to the inherited panes.
+ *  - The legacy navigation column is hidden ONLY while `#scCelestialCenter` is
+ *    actually in the DOM (sibling combinator), so a failed build degrades to
+ *    the legacy interface rather than to an empty pane.
+ *  - No rule here references `.hidden`; the legacy visibility contract
+ *    (docs/UI_DOM_CONTRACT.md) is untouched, as is `.tab-pane` display logic.
+ *  - Every state carries a glyph and a word in the markup; colour is
+ *    reinforcement, never the only cue.
+ * ==========================================================================*/
+
+/* ========================================================================== *
+ * 1. VIEW SWAP
+ * ========================================================================== */
+
+/* The legacy nav column stays in the document — `activeSolarTab()`,
+   `launchRocket()` and `explore()` all write to those rows, several without a
+   null guard. We only take it out of view. */
+html[data-ui="modern"][data-space="map"]
+  #scCelestialCenter ~ .container[style*="250px"] {
+  display: none;
+}
+
+html[data-ui="modern"][data-space="map"] #solarSystem > .tab-content {
+  clear: both;
+}
+html[data-ui="modern"][data-space="map"] #solarSystem > .tab-content > .tab-pane {
+  margin-left: 0 !important;
+  float: none !important;
+}
+html[data-ui="modern"][data-space="map"] #solarSystem > .tab-content > .tab-pane > .container {
+  max-width: none !important;
+  width: 100%;
+  padding: 0;
+}
+
+/* ========================================================================== *
+ * 2. SHELL
+ * ========================================================================== */
+
+html[data-ui="modern"][data-space="map"] .sc-cel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sc-sp-4);
+  margin-bottom: var(--sc-sp-5);
+  color: var(--sc-text);
+  font-family: var(--sc-font-ui);
+}
+
+html[data-ui="modern"][data-space="map"] .sc-cel__head {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) auto auto;
+  grid-template-areas: 'lead stats actions';
+  align-items: center;
+  gap: var(--sc-sp-3) var(--sc-sp-5);
+  padding: var(--sc-sp-4) var(--sc-sp-5);
+  background: var(--sc-surface-glass);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-1);
+}
+
+html[data-ui="modern"][data-space="map"] .sc-cel__lead { grid-area: lead; }
+
+html[data-ui="modern"][data-space="map"] .sc-cel__title {
+  margin: 0;
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-lg);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-strong);
+}
+
+html[data-ui="modern"][data-space="map"] .sc-cel__sub {
+  margin: var(--sc-sp-1) 0 0;
+  font-size: var(--sc-fs-sm);
+  color: var(--sc-text-muted);
+}
+
+html[data-ui="modern"][data-space="map"] .sc-cel__stats {
+  grid-area: stats;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-sp-5);
+  margin: 0;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__stat { margin: 0; }
+html[data-ui="modern"][data-space="map"] .sc-cel__stat-label {
+  margin: 0;
+  font-size: var(--sc-fs-xs);
+  font-weight: 500;
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+  white-space: nowrap;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__stat-value {
+  margin: 2px 0 0;
+  font-family: var(--sc-font-mono);
+  font-size: var(--sc-fs-md);
+  font-variant-numeric: tabular-nums;
+  color: var(--sc-text-strong);
+  white-space: nowrap;
+}
+html[data-ui="modern"][data-space="map"] #scCelFuel { color: var(--sc-cyan); }
+
+html[data-ui="modern"][data-space="map"] .sc-cel__actions {
+  grid-area: actions;
+  display: flex;
+  gap: var(--sc-sp-2);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__btn {
+  min-height: 44px;
+  padding: 0 var(--sc-sp-4);
+  font-size: var(--sc-fs-sm);
+  font-weight: 600;
+  color: var(--sc-text);
+  background: var(--sc-surface-2);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+  border-radius: var(--sc-r-2);
+  cursor: pointer;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__btn:hover {
+  background: var(--sc-surface-3);
+  color: var(--sc-text-strong);
+}
+
+html[data-ui="modern"][data-space="map"] .sc-cel__legend {
+  padding: var(--sc-sp-3) var(--sc-sp-5);
+  background: var(--sc-surface-1);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-sp-2) var(--sc-sp-5);
+  margin: 0; padding: 0;
+  list-style: none;
+  font-size: var(--sc-fs-sm);
+  color: var(--sc-text-secondary);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__legend-item {
+  display: flex; align-items: center; gap: var(--sc-sp-2);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__legend-glyph {
+  width: 20px; text-align: center; font-size: var(--sc-fs-md);
+}
+
+/* ========================================================================== *
+ * 3. WORKSPACE
+ * ========================================================================== */
+
+html[data-ui="modern"][data-space="map"] .sc-cel__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--sc-sp-4);
+  align-items: start;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sc-sp-4);
+  min-width: 0;
+}
+
+html[data-ui="modern"][data-space="map"] .sc-cel__panel {
+  padding: var(--sc-sp-4);
+  background:
+    radial-gradient(120% 90% at 50% 40%, rgba(53, 224, 214, 0.05), transparent 62%),
+    var(--sc-space-1);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-1);
+}
+
+html[data-ui="modern"][data-space="map"] .sc-cel__panel-title {
+  margin: 0 0 var(--sc-sp-3);
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-xs);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+
+/* --- orbital map --------------------------------------------------------- */
+
+/* `overflow:auto` sets this flex item's min-height to 0, which let the orbit
+   panel collapse and the interstellar panel ride up into the map. Pinning the
+   height to the canvas removes that whole class of instability. */
+html[data-ui="modern"][data-space="map"] .sc-cel__map {
+  overflow: auto;
+  overscroll-behavior: contain;
+  height: min(72vh, 680px);
+  min-height: 420px;
+  flex: none;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__canvas {
+  position: relative;
+  margin: 0 auto;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__orbits {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__orbit {
+  fill: none;
+  stroke: rgba(126, 166, 214, 0.16);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__sun {
+  fill: var(--sc-amber);
+  filter: drop-shadow(0 0 14px var(--sc-amber-glow));
+}
+
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="map"] .sc-cel__ring {
+  display: contents;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="map"] .sc-cel__ring-title {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* --- destination node ---------------------------------------------------- */
+
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="map"] .sc-cel-node {
+  position: absolute;
+  z-index: 2;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel-node {
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  background: var(--sc-surface-1);
+  box-shadow: var(--sc-elev-1);
+  overflow: hidden;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel-node__select,
+html[data-ui="modern"][data-space="map"] .sc-cel-star__select {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: 100%;
+  padding: var(--sc-sp-2);
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel-node__badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--sc-text-muted);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel-node__label {
+  font-size: var(--sc-fs-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--sc-text-strong);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel-node__meta,
+html[data-ui="modern"][data-space="map"] .sc-cel-star__meta {
+  font-size: 10.5px;
+  color: var(--sc-text-muted);
+  font-family: var(--sc-font-mono);
+}
+
+/* --- per-state treatment (border + glyph + word, never colour alone) ----- */
+
+html[data-ui="modern"][data-space="map"] .sc-state-ready.sc-cel-node,
+html[data-ui="modern"][data-space="map"] .sc-state-ready.sc-cel-star {
+  border-color: var(--sc-cyan-dim);
+  box-shadow: var(--sc-glow-cyan);
+}
+html[data-ui="modern"][data-space="map"] .sc-state-ready .sc-cel-node__badge { color: var(--sc-cyan); }
+
+html[data-ui="modern"][data-space="map"] .sc-state-blocked.sc-cel-node,
+html[data-ui="modern"][data-space="map"] .sc-state-blocked.sc-cel-star {
+  border-color: rgba(255, 93, 108, 0.35);
+}
+html[data-ui="modern"][data-space="map"] .sc-state-blocked .sc-cel-node__badge { color: var(--sc-negative); }
+
+html[data-ui="modern"][data-space="map"] .sc-state-explored.sc-cel-node,
+html[data-ui="modern"][data-space="map"] .sc-state-explored.sc-cel-star {
+  background: rgba(71, 217, 141, 0.06);
+  border-color: rgba(71, 217, 141, 0.3);
+}
+html[data-ui="modern"][data-space="map"] .sc-state-explored .sc-cel-node__badge { color: var(--sc-positive); }
+
+html[data-ui="modern"][data-space="map"] .sc-state-completed.sc-cel-node,
+html[data-ui="modern"][data-space="map"] .sc-state-completed.sc-cel-star {
+  background: rgba(245, 181, 68, 0.07);
+  border-color: var(--sc-amber-dim);
+}
+html[data-ui="modern"][data-space="map"] .sc-state-survey { opacity: 0.82; }
+
+html[data-ui="modern"][data-space="map"] .sc-is-concealed {
+  opacity: 0.45;
+  border-style: dashed;
+  border-color: rgba(126, 166, 214, 0.14);
+  box-shadow: none;
+}
+html[data-ui="modern"][data-space="map"] .sc-is-concealed .sc-cel-node__select,
+html[data-ui="modern"][data-space="map"] .sc-is-concealed .sc-cel-star__select {
+  cursor: default;
+}
+
+html[data-ui="modern"][data-space="map"] .sc-is-selected {
+  border-color: var(--sc-cyan-bright) !important;
+  box-shadow: 0 0 0 2px var(--sc-cyan-bright), var(--sc-elev-2);
+}
+
+html[data-ui="modern"][data-space="map"] .sc-cel-node__select:focus-visible,
+html[data-ui="modern"][data-space="map"] .sc-cel-star__select:focus-visible,
+html[data-ui="modern"][data-space="map"] .sc-cel__btn:focus-visible,
+html[data-ui="modern"][data-space="map"] .sc-cel__act:focus-visible,
+html[data-ui="modern"][data-space="map"] .sc-cel__open:focus-visible {
+  outline: none;
+  box-shadow: var(--sc-focus-ring);
+}
+
+/* --- interstellar network ------------------------------------------------ */
+
+html[data-ui="modern"][data-space="map"] .sc-cel__panel--stars.sc-is-dormant { opacity: 0.7; }
+html[data-ui="modern"][data-space="map"] .sc-cel__stars-note {
+  margin: 0 0 var(--sc-sp-3);
+  font-size: var(--sc-fs-sm);
+  color: var(--sc-text-muted);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__stars {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--sc-sp-2);
+  max-height: 320px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel-star {
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-2);
+  background: var(--sc-surface-1);
+  overflow: hidden;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel-star__glyph {
+  font-size: var(--sc-fs-md);
+  color: var(--sc-text-muted);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel-star__label {
+  font-size: var(--sc-fs-sm);
+  font-weight: 600;
+  color: var(--sc-text-strong);
+}
+
+/* ========================================================================== *
+ * 4. INSPECTOR
+ * ========================================================================== */
+
+html[data-ui="modern"][data-space="map"] .sc-cel__inspector {
+  position: sticky;
+  top: var(--sc-sp-4);
+  padding: var(--sc-sp-4);
+  background: var(--sc-surface-glass);
+  border: var(--sc-bw-1) solid var(--sc-border);
+  border-radius: var(--sc-r-3);
+  box-shadow: var(--sc-elev-1);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__frontier {
+  margin: 0;
+  font-size: var(--sc-fs-sm);
+  color: var(--sc-cyan);
+  font-family: var(--sc-font-mono);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__hint {
+  margin: var(--sc-sp-3) 0 0;
+  font-size: var(--sc-fs-xs);
+  color: var(--sc-text-muted);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__panel-state {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--sc-fs-xs); font-weight: 700;
+  letter-spacing: var(--sc-tracking-label); text-transform: uppercase;
+  color: var(--sc-text-secondary);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__panel-state.sc-state-ready { color: var(--sc-cyan); }
+html[data-ui="modern"][data-space="map"] .sc-cel__panel-state.sc-state-blocked { color: var(--sc-negative); }
+html[data-ui="modern"][data-space="map"] .sc-cel__panel-state.sc-state-explored { color: var(--sc-positive); }
+html[data-ui="modern"][data-space="map"] .sc-cel__panel-state.sc-state-completed { color: var(--sc-amber); }
+
+html[data-ui="modern"][data-space="map"] .sc-cel__panel-name {
+  margin: var(--sc-sp-2) 0 2px;
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-md);
+  color: var(--sc-text-strong);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__panel-type {
+  margin: 0;
+  font-size: var(--sc-fs-xs);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__facts {
+  display: grid; gap: 6px;
+  margin: var(--sc-sp-3) 0;
+  padding: var(--sc-sp-3) 0;
+  border-top: var(--sc-bw-1) solid var(--sc-divider);
+  border-bottom: var(--sc-bw-1) solid var(--sc-divider);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__fact {
+  display: flex; justify-content: space-between; gap: var(--sc-sp-3);
+  font-size: var(--sc-fs-sm);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__fact dt { color: var(--sc-text-muted); }
+html[data-ui="modern"][data-space="map"] .sc-cel__fact dd {
+  margin: 0; text-align: right;
+  font-family: var(--sc-font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sc-text-strong);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__reason {
+  margin: 0 0 var(--sc-sp-3);
+  padding: var(--sc-sp-2) var(--sc-sp-3);
+  font-size: var(--sc-fs-xs);
+  line-height: var(--sc-lh-base);
+  color: var(--sc-text-secondary);
+  background: var(--sc-info-bg);
+  border-left: var(--sc-bw-2) solid var(--sc-info);
+  border-radius: var(--sc-r-1);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__act,
+html[data-ui="modern"][data-space="map"] .sc-cel__open {
+  display: block; width: 100%; min-height: 44px;
+  margin-top: var(--sc-sp-2);
+  font-size: var(--sc-fs-sm); font-weight: 700;
+  border-radius: var(--sc-r-2); cursor: pointer;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__act {
+  color: var(--sc-text-on-accent);
+  background: var(--sc-cyan);
+  border: 0;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__act:hover:not([disabled]) { background: var(--sc-cyan-bright); }
+html[data-ui="modern"][data-space="map"] .sc-cel__open {
+  color: var(--sc-text);
+  background: var(--sc-surface-2);
+  border: var(--sc-bw-1) solid var(--sc-border-strong);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel__open:hover { background: var(--sc-surface-3); }
+
+/* Our own collapse utility — the legacy `.hidden` contract is never touched. */
+html[data-ui="modern"][data-space="map"] .sc-is-collapsed { display: none !important; }
+
+/* ========================================================================== *
+ * 5. ROUTE MODE — phones get a vertical mission route, not a shrunken orbit
+ * ========================================================================== */
+
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel__map {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel__canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel__orbits { display: none; }
+
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel__ring {
+  position: relative;
+  display: block;
+  margin-bottom: var(--sc-sp-4);
+  padding-left: var(--sc-sp-5);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel__ring::before {
+  content: '';
+  position: absolute; top: 8px; bottom: 8px; left: 7px; width: 2px;
+  background: linear-gradient(180deg, var(--sc-cyan-dim), rgba(126, 166, 214, 0.12));
+  border-radius: var(--sc-r-pill);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel__ring-title {
+  margin: 0 0 var(--sc-sp-2);
+  font-family: var(--sc-font-display);
+  font-size: var(--sc-fs-xs);
+  letter-spacing: var(--sc-tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel-node {
+  position: static !important;
+  width: 100% !important;
+  margin-bottom: var(--sc-sp-2);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel-node__select,
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel-star__select {
+  min-height: 56px;
+  padding: var(--sc-sp-3);
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel__stars {
+  grid-template-columns: minmax(0, 1fr);
+  max-height: none;
+}
+html[data-ui="modern"][data-space="map"] .sc-cel[data-layout="route"] .sc-cel__inspector {
+  position: static;
+  margin-top: var(--sc-sp-4);
+}
+
+@media (max-width: 900px) {
+  html[data-ui="modern"][data-space="map"] .sc-cel__head {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'lead' 'stats' 'actions';
+  }
+  html[data-ui="modern"][data-space="map"] .sc-cel__actions .sc-cel__btn { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui="modern"][data-space="map"] .sc-cel__btn,
+  html[data-ui="modern"][data-space="map"] .sc-cel__act { transition: none; }
+  html[data-ui="modern"][data-space="map"] .sc-cel__sun { filter: none; }
+}
