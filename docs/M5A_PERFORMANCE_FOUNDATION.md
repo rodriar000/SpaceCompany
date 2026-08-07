@@ -188,6 +188,50 @@ controlled for. DevTools instrumentation was **not** attached during timing.
 `--expose-gc` was enabled and `gc()` **was forced** at each soak checkpoint;
 this is stated because forced GC changes the shape of a heap series.
 
+## 9a. Selected-row legibility correction and its evidence
+
+Bootstrap marks the active row with `.info`, painting the CELL `#d9edf7`. Under
+the modern dark shell the text stays near-white, measuring **1.03:1** — the row
+present, correctly selected, and unreadable. M3 and M4 had each patched their
+own pane, so it survived only where those rules do not apply. Corrected once in
+`styles/modern/components.css` for every pane, scoped to
+`html[data-ui="modern"]` so `?ui=legacy` is untouched, with a solid leading edge
+so selection is not colour-alone and `.red`/`.green` re-asserted so values keep
+their meaning.
+
+### Where the reported controls actually live in DEFAULT modern mode
+
+The defect was reported as "Research" and "Space Fuel". Their runtime identities
+and their status with **no query string** (`http://localhost:8080/`,
+`location.search === ""`, `data-ui=modern`, `resources=cards`, `research=graph`,
+`space=map`, one root each of M2/M3/M4):
+
+| Reported | Canonical id | Visible in default modern? | Modern element carrying the values |
+| --- | --- | --- | --- |
+| "Research" | `#scienceNav` "Science Production" | **Yes** — 316×44, restyled by M3 into a segmented control | the row itself; selected reads **12.32:1** |
+| "Space Fuel" | `#rocketFuelNav` "Rocket Fuel" | **No** — its container is `display:none`; M4 replaces it | M4 header `#scCelFuel` (**10.36:1**) + destination inspector Cost / You hold / Still needed (**15.97:1**) |
+
+`#rocketFuelNav` being hidden in modern mode is intentional, not a regression:
+the M4 celestial command center supersedes the legacy 250px column. The modern
+header value was verified **byte-identical to the canonical `#rocketFuel` span**.
+
+### Evidence classes — do not conflate them
+
+* **Modern evidence** (`m5a-modern-*`): captured at `http://localhost:8080/`
+  with an **empty query string**, each screenshot gated on the assertions above.
+  This is the acceptance evidence for the default experience.
+* **Fallback evidence** (`m5a-selected-research-*`, `m5a-selected-space-fuel-*`):
+  captured with `?research=legacy` / `?space=legacy`. These demonstrate the fix
+  in the component fallbacks **only**, where the 1.03:1 defect was reachable.
+  They are retained deliberately and must not be cited as proof of default
+  modern behaviour.
+
+Modern-only matrix — 6 viewports × {progressed, late}, **12/12 pass**: M2 12–17
+unlocked cards selected each run (worst 4.76:1), M3 node + inspector telemetry
+(worst 10.36:1), M4 destination + Rocket Fuel telemetry (worst 10.36:1, parity
+with the canonical span true), no blank value, no clipping, no overflow, one
+active pane, 0 console errors, 0 failed assets, 0 third-party requests.
+
 ## 10. Not delivered — remaining M5 scope
 
 | Slice | Work |
