@@ -79,3 +79,23 @@ No other external hosts are contacted at runtime.
 - The UI-mode switch (`?ui=legacy`) is derived from the URL on each load and is
   **never** persisted — it does not touch the save. Enforced by
   `test/uiModeSwitch.test.mjs`.
+
+
+## M5a — the last third-party runtime request is gone
+
+M1 removed the inherited Google Analytics and Kongregate scripts. One remote
+request remained: a stylesheet from `fonts.googleapis.com` for the Orbitron
+display face, which leaked the visitor's IP, User-Agent and referring page to a
+third party on every load.
+
+**M5a removes it.** The display face now resolves from a local stack —
+`Orbitron` if the user happens to have it installed, then Eurostile, Bank
+Gothic, Michroma, Bahnschrift, DIN Alternate, Avenir Next Condensed, Futura,
+Trebuchet MS, and finally the UI stack. No font file is downloaded, no font is
+self-hosted, and no new licence obligation is introduced.
+
+Verified across 10 viewport/mode combinations: **zero requests** to
+`fonts.googleapis.com`, `fonts.gstatic.com`, or any other font provider, and
+zero analytics/Kongregate/Discord requests.
+
+The game now makes **no third-party network request at runtime**.

@@ -115,6 +115,26 @@ Guiding principles:
 - ✅ No gameplay, balance, progression, economy or save-schema change.
 - Evidence: [M4_CELESTIAL_OPERATIONS.md](M4_CELESTIAL_OPERATIONS.md).
 
+## M5a — Performance foundation 🚧 (implemented on `feature/m5-...`, pending review)
+
+- ✅ Found and removed the game's dominant per-tick cost: `updateBoundElements`
+  re-evaluated 629 bound lambdas every 100 ms, ~626 of which called
+  `Game.settings.format`, whose `toLocaleString` measured ~16.7 µs per call —
+  85% of all per-tick work. A bounded, byte-identical memo cut combined modern
+  work p95 from **4.9 ms to 0.9 ms** (inside the 3 ms budget it was failing) and
+  `Game.fastUpdate` p95 from **12.9 ms to 1.6 ms**, across 4 viewports × 5 states.
+- ✅ Removed the last third-party runtime request (`fonts.googleapis.com`).
+- ✅ Added the `sc.ui.*` preference store, the motion foundation and a single
+  pair of live regions — the last two **dormant** until M5b wires them.
+- Evidence: [M5A_PERFORMANCE_FOUNDATION.md](M5A_PERFORMANCE_FOUNDATION.md),
+  budgets in [PERFORMANCE_BUDGETS.md](PERFORMANCE_BUDGETS.md).
+
+## M5b/M5c/M5d — Accessibility, notifications, viewport controls (not started)
+
+- Keyboard model, WCAG audit and contrast, announcement wiring (M5b).
+- Notification centre with burst control, settings panel, optional audio (M5c).
+- Shared map zoom/pan/reset for M3 and M4, interaction traces, full QA matrix (M5d).
+
 ## M5 — Accessibility, motion & audio polish
 
 - Keyboard navigation, focus management, ARIA, reduced-motion support, colour
