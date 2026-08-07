@@ -98,6 +98,47 @@ html[data-ui="modern"] .table > tbody > tr > th {
 }
 html[data-ui="modern"] .table-hover > tbody > tr:hover > td { background: var(--sc-cyan-faint); }
 
+/* --------------------------------------------------------------------------
+ * Selected legacy rows (`.info`) — M5a correction
+ *
+ * `activeResourceTab()`, `activeResearchTab()`, `activeSolarTab()`,
+ * `activeWonderTab()`, `activeSolCenterTab()` and `activeInterstellarTab()` all
+ * mark the current row by appending Bootstrap's `info` class. Bootstrap then
+ * paints the CELL `#d9edf7` — a light blue chosen for a light theme. Against
+ * the modern shell's near-white body text that measured 1.03:1: the row stayed
+ * present but its name, rate and amount were effectively invisible.
+ *
+ * The M3 research pane and the M4 celestial pane each fixed their own copy of
+ * this, so the defect only survived where those per-pane rules do not apply —
+ * `?research=legacy` (Science Production), `?space=legacy` (Rocket Fuel) and
+ * `?resources=legacy` (all 17 resource rows). Fixing it once here, at the
+ * modern legacy-compatibility layer, covers every pane and every future row.
+ *
+ * Scoped to `html[data-ui="modern"]`, so `?ui=legacy` keeps the original
+ * Bootstrap appearance exactly as inherited. Specificity (0,3,4) beats
+ * Bootstrap's (0,2,3) and its hover variant, so no `!important` is needed. */
+html[data-ui="modern"] .table > tbody > tr.info > td,
+html[data-ui="modern"] .table > tbody > tr.info > th,
+html[data-ui="modern"] .table-hover > tbody > tr.info:hover > td,
+html[data-ui="modern"] tr.info > td {
+  background-color: var(--sc-cyan-faint);
+  color: var(--sc-text-strong);
+}
+
+/* The selection must not be carried by colour alone: the active row also gains
+   a solid leading edge, which survives greyscale and forced-colours modes. */
+html[data-ui="modern"] .table > tbody > tr.info > td:first-child,
+html[data-ui="modern"] tr.info > td:first-child {
+  box-shadow: inset 3px 0 0 0 var(--sc-cyan);
+}
+
+/* Semantic value colours (affordable/deficit/full) must keep winning over the
+   selected-row colour, so a selected row never loses its meaning. */
+html[data-ui="modern"] tr.info > td .red,
+html[data-ui="modern"] tr.info > td.red { color: var(--sc-negative); }
+html[data-ui="modern"] tr.info > td .green,
+html[data-ui="modern"] tr.info > td.green { color: var(--sc-positive); }
+
 /* Resource navigation rows — light restyle only (full cards belong to M2). */
 html[data-ui="modern"] #resourceNavParent { border-collapse: separate; border-spacing: 0 6px; }
 html[data-ui="modern"] #resourceNavParent > tbody > tr,

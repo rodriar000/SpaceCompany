@@ -27,7 +27,9 @@
   --sc-text:        #e7eef8;
   --sc-text-strong: #f4f8ff;
   --sc-text-secondary: #a9b8cc;
-  --sc-text-muted:  #6d7f97;
+  /* M5a: lightened from #6d7f97, which measured 4.46:1 on the card surface —
+     just under the 4.5:1 needed for normal text. Now 4.86:1. */
+  --sc-text-muted:  #7385a0;
   --sc-text-on-accent: #04121a;
 
   /* --- Reactor cyan accent (interactive / active) --- */
